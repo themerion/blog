@@ -1,0 +1,186 @@
+#title# Sorting javascript arrays on multiple properties
+#meta# A nice pattern for sorting tables of data.
+<article>
+	<h1>Sorting javascript arrays on multiple properties</h1>
+
+	<ol id="article-index">
+		<li><a href="#tldr">tl;dr</a></li>
+		<li><a href="#compare-function">Array.sort's compare function</a></li>
+		<li><a href="#sort-numbers">Sorting numbers and Math.sign</a></li>
+		<li><a href="#or-operator">The || operator</a></li>
+		<li><a href="#composing-functions">Composing compare-functions</a></li>
+	</ol>
+
+	<h2 id="tldr">tl;dr</h2>
+	<div class="tab-pane">
+		<div class="tab" data-title="Sleek">
+			<code><pre class="prettyprint lang-js">
+/*
+Find out what each compare function on a single property would look like, e.g: sort by name only. Then chain all the compare functions together with ||
+*/
+
+persons.sort((a, b) => {
+	const compareHasPayed = (a,b) => (!a.hasPayed?1:0) - (!b.hasPayed?1:0);
+	const compareName = (a,b) => a.name&lt;b.name?-1: b.name&lt;a.name?1:0;
+	const compareAge = (a,b) => Math.sign(a.age - b.age);
+
+	return compareHasPayed(a,b) || compareName(a,b) || compareAge(a,b);
+});					</pre></code>
+		</div>
+		<div class="tab" data-title="Verbose">
+			<code><pre class="prettyprint lang-js">
+/*
+Find out what a compare function on a single property would look like, e.g: how would you sort by name.
+Then chain all the compare functions together by ||
+*/
+persons.sort(function(a, b) {
+	return compareHasPayed(a,b) || compareName(a,b) || compareAge(a,b);
+});
+
+function compareHasPayed(a,b) {
+	function bool2Int(val) { return val?1:0; }
+	return bool2Int(a) - bool2Int(b);
+}
+
+function compareName(a,b) {
+	if(a.name&lt;b.name) return -1;
+	else if(b.name&lt;a.name) return 1;
+	else return 0;
+}
+
+function compareAge(a,b) {
+	return Math.sign(a.age - b.age);
+}
+					</pre></code>
+		</div>
+	</div>
+
+	<h2>Situation</h2>
+	<p>You have an array of persons:</p>
+	<code><pre class="prettyprint lang-js">
+let persons = [
+	{age: 47, name: "Kimmy", hasPayed: false},
+	{age: 23, name: "Kimmy", hasPayed: false},
+	{age: 16, name: "Brownie", hasPayed: true},
+	{age: 11, name: "Johnny", hasPayed: true}
+];				</pre></code>
+	<p>The job is to sort the array so that persons who have not payed comes first. Ties are sorted with
+		name
+		(alphabetically), and people with the same name are sorted with age (ascending).</p>
+
+	<h2 id="compare-function">Array.sort's compare function</h2>
+	<p>In order to sort an array of objects, we need to supply a <a
+			href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort"><b>compare
+				function</b></a>.
+		The job of this function is to tell, for two given objects in the array, in which order they
+		should
+		appear. The compare function will return -1, 0 or 1 to indicate this.</p>
+
+	<style>
+		#compareFunctionTable td {
+			text-align: center;
+		}
+	</style>
+
+	<table id="compareFunctionTable">
+		<thead>
+			<tr>
+				<th>We want</th>
+				<th>We return</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><u>object1</u> should be placed <b>before</b> <u>object2</u></td>
+				<td>-1</td>
+			</tr>
+			<tr>
+				<td><u>object1</u> should be placed <b>after</b> <u>object2</u></td>
+				<td>1</td>
+			</tr>
+			<tr>
+				<td>With regards to the sorting, they are equal.</td>
+				<td>0</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<p>A simple implementation which will sort persons with lower age first:</p>
+
+	<code><pre class="prettyprint lang-js">
+function compareAge(obj1, obj2) {
+	if(obj1.age &lt; obj2.age)
+		return -1;
+	else if(obj1.age &gt; obj2.age)
+		return 1;
+	return 0;
+}
+
+persons.sort(compareAge);</pre></code>
+
+	<h2 id="sort-numbers">Sorting numbers and math.sign</h2>
+	<p>There is a nicer way to create a comparison function for numbers:</p>
+	<code><pre class="prettyprint lang-js">
+function compareAge(obj1, obj2) {
+	return obj1.age - obj2.age;
+}</pre></code>
+	<p>The difference in age will return either a negative number, zero, or a positive number. This is
+		actually
+		OK! The negative number will be parsed as -1, the positive number will be parsed as 1. However,
+		certain
+		environments (hello Google App Scripts) absolutly require -1, 0 or 1. So just to be safe we can
+		apply
+		the <a href="https://en.wikipedia.org/wiki/Sign_function">sign function</a>:</p>
+	<code><pre class="prettyprint lang-js">
+function compareAge(obj1, obj2) {
+	return Math.sign(obj1.age - obj2.age);
+}</pre></code>
+
+	<h2 id="or-operator">The || operator</h2>
+	<p>In most programming languages, the || operator is reserved for boolean operations. In JavaScript,
+		it is
+		much more powerful.</p>
+	<p class="important-note">|| starts from the left and returns the first non-falsy value it
+		encounters.
+	</p>
+	<p>If no values are non-falsy, the <i>rightmost</i> value is returned. Some examples will hopefully
+		make this clear:
+	</p>
+	<code><pre class="prettyprint lang-js">
+let a = false || 0 || 47 || 3
+// a = 47
+
+let b = 0 || -1 || 1
+// b = -1
+
+let c = getErrorMessage() || ""
+// If there is an error message, c is the error message. Otherwise c is "".
+</pre></code>
+	<p>More info on <a href="https://developer.mozilla.org/en-US/docs/Glossary/Falsy">falsy
+			values</a>.</p>
+
+	<h2 id="composing-functions">Composing compare-functions</h2>
+	<p>Since a compare function will return 0 (a falsy value) only when the order doesn't matter, we can
+		chain compare functions with ||. This allows us to simply think about sorting one property at a
+		time.</p>
+	<code><pre class="prettyprint lang-js">
+persons.sort(function(obj1, obj2) {
+// First sort by age.
+// If comparison by age returns 0 (they are the same age):
+// then compare by name.
+	return compareAge(obj1,obj2) || compareName(obj1,obj2);
+});
+
+function compareAge(obj1, obj2) { return Math.sign(obj1.age - obj2.age); }
+
+function compareName(obj1,obj2) {
+	if(obj1.name&lt;obj2.name) return -1;
+	else if(obj1.name&lt;obj2.name) return 1;
+	else return 0;
+}
+</pre></code>
+
+	<p>See the full solution at the <a href="#tldr">top of the page</a>.</p>
+	<p>This turned out to be a quite long article. I hope you discovered something worthwile. Take care!
+		:)</p>
+</article>

@@ -1,0 +1,159 @@
+@import url('https://fonts.googleapis.com/css?family=Merriweather');
+
+/* media screen size blah blah... */
+
+@media screen and (max-width: 859px) {
+	#container {
+		padding: 20px 50px;
+	}    
+}
+@media screen and (min-width: 860px) {
+	#container {
+		width: 760px;
+		padding: 20px 50px;
+		margin: 0px auto;
+	}
+}
+
+@import url('https://fonts.googleapis.com/css?family=Source+Code+Pro');
+
+/* Normal settings */
+
+html {
+	height: 100%;
+}
+
+body {
+	color: #444;
+	background: linear-gradient(to top right, lightsalmon, papayawhip);
+	background-repeat: none;
+	background-attachment: fixed;
+	height: 100%;
+	margin: 0px;
+}
+
+h1, h2 {
+	font-family: sans-serif;
+}
+
+p, ul, ol, li, dd, dl, dt {
+	font-family: 'Merriweather', sans-serif;
+	font-size: 16px;
+	line-height: 190%;
+}
+
+pre {
+	font-family: "Source Code Pro", "Courier New", "Courier";
+	font-size: 14px;
+}
+
+
+table {
+	border-collapse: collapse;
+	font-family: "Merriweather", sans-serif;
+	font-size: 12px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+thead tr {
+	background-color: #a74075;
+	color: #fff;
+}
+
+tr:nth-child(even) {
+	background-color: #ffe0f0
+}
+
+td, th {
+	border: 0px grey solid;
+	padding: 5px;
+}
+
+#container {
+	background: #fefefe;
+}
+
+#title {
+	text-align: center;
+	margin-top: 0px; /* Stupid, but might cause #container to not be placed at top of page otherwise */
+	font-size: 40px;
+}
+#title a {
+	text-decoration: none;
+	color: #444;
+}
+
+#subtitle {
+	display: block;
+	font-size: 12px;
+	font-style: italic;
+	font-weight: normal;
+}
+
+#about p {
+	text-align: justify;
+}
+
+.article-list section p a, .article-list section h2 a {
+	color: #444;
+	text-decoration: none;    
+}
+
+.article-list section h2 {
+	margin-bottom: 5px;
+}
+.article-list section p {
+	margin-top: 5px;
+}
+.article-list section {
+	border-bottom: #444;
+}
+
+
+article h1 {
+	font-size: 30px;
+	margin-bottom: 40px;
+}
+article h2 {
+	margin-top: 70px;
+}
+
+#article-index {
+	font-family: 'Merriweather', sans-serif;
+}
+
+.important-note {
+	margin-left: 20px;
+	margin-right: 20px;
+	background-color: lightsalmon;
+	font-size: larger;
+	box-shadow: 5px 5px 5px grey;
+}
+
+/* Adapted from https://codepen.io/ibrahimjabbari/pen/ozinB */
+hr.nice {
+	border: 0px solid #999;
+	text-align: center;
+	line-height: 0px;
+}
+hr.nice:after {
+	content: '§';
+	display: inline-block;
+	position: relative;
+	padding-top: 19px;
+	padding-bottom: 21px;
+	background: #fefefe;
+	color: #999;
+	font-size: 22px;
+	font-weight: bold;
+	-webkit-transform: rotate(60deg);
+	-moz-transform: rotate(60deg);
+	transform: rotate(60deg);
+}
+
+/* ===== TABS ====== */
+.tab-button {
+	margin-left: 10px;
+	cursor: pointer;
+}

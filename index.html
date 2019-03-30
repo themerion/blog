@@ -1,0 +1,31 @@
+<div class="article-list">
+	<section>
+		<h2><a href="articles/sorting-javascript-arrays.html">Sorting javascript arrays on multiple properties</a></h2>
+		<p><a href="articles/sorting-javascript-arrays.html">A nice pattern for sorting tables of data.</a></p>
+	</section>
+	<!--<section>
+				<h2><a href="articles/case-against-methods.html">A case against class methods</a></h2>
+				<p><a href="articles/case-against-methods.html">A short ramble about pure functions and the drawbacks of using classes.</a></p>
+			</section>-->
+</div>
+
+<hr class="nice" />
+<section id="about">
+	<h2>About me</h2>
+	<p>Name's Erik Lissel, and I'm <span id="age"></span> years old. I am crazy about programming&nbsp;patterns
+		and making code that has as low complexity as possible. I am currently very warm towards JavaScript and the
+		functional patterns it enables.
+		I work at a small digital business company in Örebro, Sweden: <a href="https://impera.se">Impera</a>. When I'm
+		not staring at a screen I enjoy: downhill&nbsp;skiing,
+		tabletop&nbsp;games, and singing. I also do physical exercise several times a week to keep the mind and body
+		sharp.</p>
+</section>
+
+<script>
+	(function () { // SO SAFE <3
+		var age = document.querySelector("#age");  // var: SO COMPATIBLE WITH SH*T BROWSERS <3
+		var ageDiffMs = new Date().getTime() - new Date("1988-07-08").getTime(); // Feel free to send edible presents.
+		var ageDate = new Date(ageDiffMs);
+		age.innerHTML = Math.abs(ageDate.getUTCFullYear() - 1970);
+	})();
+</script>
