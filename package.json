@@ -1,0 +1,22 @@
+{
+  "name": "blog",
+  "version": "1.0.0",
+  "description": "Lissels blog",
+  "main": "build.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/eriklissel/blog.git"
+  },
+  "author": "erik@lissel.net",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/eriklissel/blog/issues"
+  },
+  "homepage": "https://gitlab.com/eriklissel/blog#readme",
+  "dependencies": {
+    "moment": "^2.24.0"
+  }
+}

@@ -1,18 +1,102 @@
 #title# A case against class methods
 #meta# The benefits of minimizing implicit state and pure functions.
-<article>
-	<h1>A case against class methods</h1>
+#created# 2019-03-30
+#tags# functional
 
-	<h2>tl;dr</h2>
-	<dl>
-		<dt>Complexity</dt>
-		<dd>The state of the entire class is always available to the function...</dd>
-		<dt>Purity</dt>
-		<dd>...this makes it easy to write non-pure functions.</dd>
-		<dt>this-keyword</dt>
-		<dd>Not very intuitive in javascript, especially concerning function pointers.</dd>
-	</dl>
+<h2>tl;dr</h2>
+<dl>
+	<dt>Complexity</dt>
+	<dd>The state of the entire class is always available to the function...</dd>
+	<dt>Purity</dt>
+	<dd>...this makes it easy to write non-pure functions.</dd>
+	<dt>Non-class functions</dt>
+	<dd>Is a way to enforce purity.</dd>
+</dl>
 
-	<h2>Complexity</h2>
-	<p></p>
-</article>
+<h2>Situation</h2>
+<p>You have to take care of a bug report: it seems like for some customers the screen turns red when a customer clicks
+	the "unlock" button. The class is quite ungainly, you were supposed to refactor it, but oh well here we are. You
+	have just discovered the event callback function:</p>
+<code><pre class="prettyprint lang-js">
+class MyOvergrownSemiAbstractController {
+
+	// Row 3:
+	// Lots of variables, at least 50
+
+	// Rows 65-373
+	// Lots of code ...
+
+	// Row 374:
+	onButtonUnlockClick(optionalBoolean) {
+		this.configureState(5);
+		if(optionalBoolean) this.setSmurfs();
+		return this.getSmurfX();
+	}
+}
+</pre></code>
+
+<h2>Complexity</h2>
+<p>At a first glance, this seems quite nice. If we assume that Smurf actually is a meaningful word in this project, the
+	code is split info different descriptive functions. Each function has zero or one argument. This is all according to
+	the style advocated in <a href="https://www.oreilly.com/library/view/clean-code/9780136083238/">Clean Code</a>.</a>
+</p>
+<p>However, appearances can be deceiving. Remember, the class owns 50 variables. This means that the complexity of
+	<code>configureState</code> is not only 1 input variable; the complexity is 1 input variable <span
+		style="color:crimson; font-weight:bold">and 50 class variables</span>. Even worse, it could potentially
+	<u>modify</u> 50 of those. We wouldn't know without inspecting each and every function. But if we have to actually look at every function, then
+	what was the point of putting the code in separate functions? Functions are supposed to be abstractions, and if you always have to look through them
+	they are quite meaningless abstractions.</p>
+<p>Maybe, the problem with the code is simply that <code>setSmurfs</code> actually has to be run before
+	<code>configureState</code>, to set variable 32 to the correct value. There is however no way for us to know that
+	by looking at <code>onButtonUnlockClick</code>.</p>
+
+<h2>Purity</h2>
+<p>A pure function is only allowed to read from its input variables. It is not allowed to modify any variables outside
+	its own body. This means that a pure function pretty much always needs to have a return value (in order to be
+	meaningful).
+	The benefit of pure functions is that they are <span style="color:seagreen; font-weight:bold">predictable</span>. For the same set of input variables, the return value will always be the same.</p>
+	<p>Mathematical functions are always pure:</p>
+<code><pre class="prettyprint lang-js">
+// This will always equal -2.4. Even in a bloated class ;-)
+Math.min(-2.4, 73)
+</pre></code>
+
+<p>Rewriting our event-callback in a pure fashion could look like the following.</p>
+<code><pre class="prettyprint lang-js">
+onButtonUnlockClick(optionalBoolean) {
+	let smurfReadiness = this.getState(5);
+	let extraSmurfs = optionalBoolean
+		? this.setSmurfs()
+		: []
+	return this.getSmurfX(smurfReadiness, extraSmurfs);
+}
+</pre></code>
+
+<p>Notice how we replaced the scary <code>configureState</code> with a <code>getState</code>. Using "get" is a subtle hint to the person reading the code that the function will not modify any data.</p>
+<p>Also, it now is clear that the call to <code>getSmurfX</code> is dependent on the other two.</p>
+
+<h2>Breaking free from the class</h2>
+
+<p>In some cases, it might be correct to be even more zealous. If a function is pure, why should we keep it as a class method? If a function call is not prefixed with <code>.this</code>, that is virtually a <span style="color:seagreen; font-weight:bold">guarantee that no class variables will be read nor written to</span>.</p>
+<code><pre class="prettyprint lang-js">
+class BigUglyClass {
+	onButtonUnlockClick(optionalBoolean) {
+		let smurfReadiness = this.getState(5);
+		let extraSmurfs = optionalBoolean
+			? this.setSmurfs()
+			: []
+		//return this.getSmurfX(smurfReadiness, extraSmurfs);
+		return getSmurfX(smurfReadiness, extraSmurfs);
+	}
+}
+
+function getSmurfX(smurfReadiness, extraSmurfs) {
+	// ...
+}
+</pre></code>
+
+<p>Notice how it suddenly got much easier to create automated tests for getSmurfX-function. We just need to mock some data for <code>smurfReadiness</code> and <code>extraSmurfs</code>.</p>
+
+<h2>Ending words</h2>
+
+<p>This is all rather philosophical, but hopefully it gives you an idea or two on how to fight complexity in your projects. Now go and listen to some good music :)</p>

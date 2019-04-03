@@ -95,16 +95,43 @@ td, th {
 	text-align: justify;
 }
 
+
+.tag-container .tag {
+	background-color: grey;
+	color: white;
+	border-radius: 3px;
+	padding: 3px 3px 2px 3px;
+	margin-right: 5px;
+	font-family: "Courier New",courier;
+	font-size: 12px;
+
+}
+
+
+.article-brief {
+	border-bottom: 1px solid #ddd;
+	margin-bottom: 20px;
+}
+
+
+.article-date {
+	color: #888;
+	font-size: 14px;
+	font-style: italic;
+	margin-right: 10px;
+}
+
 .article-list section p a, .article-list section h2 a {
 	color: #444;
 	text-decoration: none;    
 }
 
 .article-list section h2 {
-	margin-bottom: 5px;
+	margin-bottom: 0px;
+	margin-top: 0px;
 }
 .article-list section p {
-	margin-top: 5px;
+	margin-top: 0px;
 }
 .article-list section {
 	border-bottom: #444;
@@ -113,10 +140,10 @@ td, th {
 
 article h1 {
 	font-size: 30px;
-	margin-bottom: 40px;
+	margin-bottom: 0px;
 }
 article h2 {
-	margin-top: 70px;
+	margin-top: 60px;
 }
 
 #article-index {
