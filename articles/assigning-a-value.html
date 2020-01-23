@@ -1,0 +1,109 @@
+#title# Assigning a value depending on conditions
+#meta# Avoiding clumsy if-then-elses and switch statements when assigning values to variables.
+#created# 2020-01-23
+#tags# C#
+
+<ol id="article-index">
+	<li><a href="#tldr">tl;dr</a></li>
+	<li><a href="#if-then-else">If-then-else is awful</a></li>
+	<li><a href="#switch-case">Switch-case is even worse</a></li>
+	<li><a href="#nested-ternaries">Nested-ternaries</a></li>
+</ol>
+
+<h2 id="tldr">tl;dr</h2>
+<code><pre class="prettyprint lang-csharp">
+string database =
+	isAdmin ? "masterDB" :
+	(stature > 100) ? "regionalDB" :
+	(name=="Johnny") ? "dummyDB" :
+	"userDB";
+</pre></code>
+
+<h2 id="if-then-else">If-then-else is awful</h2>
+<p>Let's say you want to assign some values to a variable. A common pattern would look like:</p>
+<code><pre class="prettyprint lang-csharp">
+string myVariable = "";
+if(isAdmin) {
+	myVariable = "masterDB";
+} else if(stature > 100) {
+	myVariable = "regionalDB";
+} else {
+	myVariable = "userDB";
+}
+</pre></code>
+<p>This solution has three flaws as I see it:</p>
+<ol>
+	<li>It is <b>verbose and bulky</b>. With lots of keywords, newlines and brackets. Also the variable name and assignment operator is repeated.</li>
+	<li>You might <b>forget the else-clause</b>, potentially resulting in a null pointer exception.</li>
+	<li>It <b>branches your logical flow</b> into different code paths, and invites dangerous behaviour like adding other statements inside the blocks.</li>
+</ol>
+<p>Now, setting the default value at the first line migitates (1) and (2) by allowing you to remove the last else-clause:</p>
+<code><pre class="prettyprint lang-csharp">
+string myVariable = "userDB";
+if(isAdmin) {
+	myVariable = "masterDB";
+} else if(stature > 100) {
+	myVariable = "regionalDB";
+}
+</pre></code>
+<p>I would however argue that this is worse. The first line now reads: I want to set myVariable to "userDB". Without seeing the other lines, it is no longer obvious that this is the fallback-value. We have introduced complexity (albeit on a minor scale).</p>
+
+<h2 id="switch-case">Switch-case is even worse</h2>
+<p>Look at the complaints about if-then-else. Switch solves almost none of these. The only thing switch is good for is not repeating the conditions, if the different conditions are just <em>comparing the same value</em>.</p>
+<code><pre class="prettyprint lang-csharp">
+string myVariable = "";
+switch(niceConditionVariable) {
+	case "a":
+		myVariable = "masterDB";
+		break;
+	case "b":
+		myVariable = "regionalDB";
+		break;
+	default:
+		myVariable = "userDB";
+}
+</pre></code>
+<p>The downside?</p>
+<ul>
+	<li>More <b>keyword bloat</b>: case, break, and default.</li>
+	<li>You might <b>forget a break-statement</b>, causing a fall-through to the next statement. (Yes, the C#-compiler will warn against this in some cases. Still, what happens in other environments? Java?)</li>
+	<li>The <b>syntax is odd</b> in a world that abandoned gotos and labels some twenty years ago!?</li>
+</ul>
+	
+<h2 id="nested-ternaries">Nested ternaries</h2>
+<p>A common way to structure ternaries is to try indenting them like they were if-then-else statements:</p>
+<code><pre class="prettyprint lang-csharp">
+string myVariable = (isAdmin)
+	? "masterDB"
+	: (stature > 100)
+		? "regionalDB"
+		: (name == "johnny")
+			? "dummyDB"
+			: "userDB";
+</pre></code>
+<p>This is quite horrible for readability. Notice how the resulting values are horizontally aligned with <em>another</em> condition!</p>
+<p>I would suggest to format it like this instead:</p>
+<code><pre class="prettyprint lang-csharp">
+	string myVariable = 
+		(isAdmin) ? "masterDB" :
+		(stature > 100) ? "regionalDB" :
+		(name == "johnny") ? "dummyDB" :
+		"userDB";
+	</pre></code>
+<ul>
+	<li>It is immediately clear what the statement is supposed to do: assign a variable depending on some conditions.</li>
+	<li>It <em>can not</em> perform other operations in the branches (unlike the other patterns).</li>
+	<li>It reads pretty much like a pattern matching, or configuration. If the left, then the right.</li>
+	<li>It is impossible to forget the fallback value, and it is placed last (as is proper).</li>
+</ul>
+<p>Are there downsides? Yes, especially in non compiled languages (like JavaScript). The ternary operator has quite high priority, causing some headaches if you forget parentheses:</p>
+<code><pre class="prettyprint lang-csharp">
+	string suffix = "DB";
+	string myVariable = 
+		(isAdmin) ? "master" + suffix : // oops
+		// ....
+
+		(isAdmin) ? ("master" + suffix) : // ok
+	</pre></code>
+
+<p>All in all, I really like the <em>intent</em> shown by using ternaries. "In this statement I want to assign a variable, and nothing else."</p>
