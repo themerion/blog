@@ -1,22 +1,48 @@
 @import url('https://fonts.googleapis.com/css?family=Merriweather');
-
 /* media screen size blah blah... */
 
-@media screen and (max-width: 859px) {
+@media (max-width: 599px) {
+	#container {
+		padding: 20px 20px;
+	}
+	body {
+		background-color: #fefefe;
+	}
+	#about p {
+		text-align: left;
+	}
+}
+
+@media (min-width: 600px) and (max-width: 859px) {
 	#container {
 		padding: 20px 50px;
-	}    
+	}
+	body {
+		background-color: #fefefe;
+	}
+	#about p {
+		text-align: justify;
+	}
 }
-@media screen and (min-width: 860px) {
+
+@media (min-width: 860px) {
 	#container {
 		width: 760px;
 		padding: 20px 50px;
 		margin: 0px auto;
 	}
+	body {
+		background: linear-gradient(to top right, lightsalmon, papayawhip);
+		background-repeat: none;
+		background-attachment: fixed;
+		height: 100%;
+	}
+	#about p {
+		text-align: justify;
+	}
 }
 
 @import url('https://fonts.googleapis.com/css?family=Source+Code+Pro');
-
 /* Normal settings */
 
 html {
@@ -25,10 +51,6 @@ html {
 
 body {
 	color: #444;
-	background: linear-gradient(to top right, lightsalmon, papayawhip);
-	background-repeat: none;
-	background-attachment: fixed;
-	height: 100%;
 	margin: 0px;
 }
 
@@ -42,11 +64,14 @@ p, ul, ol, li, dd, dl, dt {
 	line-height: 190%;
 }
 
+li {
+	margin-bottom: 1em;
+}
+
 pre {
 	font-family: "Source Code Pro", "Courier New", "Courier";
 	font-size: 14px;
 }
-
 
 table {
 	border-collapse: collapse;
@@ -76,9 +101,11 @@ td, th {
 
 #title {
 	text-align: center;
-	margin-top: 0px; /* Stupid, but might cause #container to not be placed at top of page otherwise */
+	margin-top: 0px;
+	/* Stupid, but might cause #container to not be placed at top of page otherwise */
 	font-size: 40px;
 }
+
 #title a {
 	text-decoration: none;
 	color: #444;
@@ -91,57 +118,53 @@ td, th {
 	font-weight: normal;
 }
 
-#about p {
-	text-align: justify;
-}
-
-
 .tag-container .tag {
 	background-color: grey;
 	color: white;
 	border-radius: 3px;
 	padding: 3px 3px 2px 3px;
 	margin-right: 5px;
-	font-family: "Courier New",courier;
+	font-family: "Courier New", courier;
 	font-size: 12px;
-
 }
-
 
 .article-brief {
 	border-bottom: 1px solid #ddd;
 	margin-bottom: 20px;
 }
 
-
 .article-date {
 	color: #888;
 	font-size: 14px;
 	font-style: italic;
 	margin-right: 10px;
+	margin-top: 6px;
+	display: inline-block;
 }
 
 .article-list section p a, .article-list section h2 a {
 	color: #444;
-	text-decoration: none;    
+	text-decoration: none;
 }
 
 .article-list section h2 {
 	margin-bottom: 0px;
 	margin-top: 0px;
 }
+
 .article-list section p {
 	margin-top: 0px;
 }
+
 .article-list section {
 	border-bottom: #444;
 }
-
 
 article h1 {
 	font-size: 30px;
 	margin-bottom: 0px;
 }
+
 article h2 {
 	margin-top: 60px;
 }
@@ -159,11 +182,13 @@ article h2 {
 }
 
 /* Adapted from https://codepen.io/ibrahimjabbari/pen/ozinB */
+
 hr.nice {
 	border: 0px solid #999;
 	text-align: center;
 	line-height: 0px;
 }
+
 hr.nice:after {
 	content: '§';
 	display: inline-block;
@@ -180,6 +205,7 @@ hr.nice:after {
 }
 
 /* ===== TABS ====== */
+
 .tab-button {
 	margin-left: 10px;
 	cursor: pointer;
