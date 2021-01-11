@@ -1,0 +1,154 @@
+#title# Do not null-check lists
+#meta# An unusual code smell
+#created# 2020-10-12
+#tags# C#
+
+<ol id="article-index">
+	<li><a href="#tldr">tl;dr</a></li>
+	<li><a href="#fail-fast-principle">Fail fast principle</a></li>
+	<li><a href="#can-variable-x-be-null">Can variable X be null...?</a></li>
+	<li><a href="#functional-approaches">Functional approaches</a></li>
+	<li><a href="#lists">Lists</a></li>
+</ol>
+
+<h2 id="tldr">tl;dr</h2>
+
+<p>Lists should never be allowed to be null, this is a code smell:</p>
+
+<code><pre class="prettyprint lang-csharp">
+if(myList != null)
+{
+	foreach(var item in myList)
+	{
+		// ...
+	}
+}
+</pre></code>
+
+<h2 id="fail-fast-principle">The fail-fast principle</h2>
+
+<p><a href="https://en.wikipedia.org/wiki/Fail-fast">The fail-fast principle</a> states that it is better for a program to crash early, if it has encountered an erroneous state.</p>
+
+<p>Imagine that class A generates a variable that has some kind of error.
+	 If the error is unrecoverable, according to the fail-fast principle, it would be best if it were A's responsibility to throw an exception, or crash.</p>
+
+<p>Let us also imagine the absolute opposite. Class A generates an erroneous value, that value is persisted in a NoSQL datastore.
+	 Three months later you get weird bug reports from users. Good luck hunting down the source of the bug.</p>
+
+<p>A program crashes with a NullPointerException only when you try to <u>access a member</u> of the null valued variable.
+ Allowing unchecked nulls in the code violates the <b>fail fast principle</b>.</p>
+
+<h2 id="can-variable-x-be-null">Can variable x be null...?</h2>
+
+	<p>Looking at any code (that you did not write yourself 5 minutes ago), you always have to wonder: should I null check this? Can this variable be null?
+		This is stealing focus from what you should be thinking: how can I achieve my clients' goals?</p>
+
+	<p>The point above is even worse for public interfaces:
+	<code><pre class="prettyprint lang-csharp">
+public interface IHouseRegister {
+	House GetHouseByPostalCode(string code);
+}
+
+var house = houseRegister.GetHouseByPostalCode("AAA"); // AAA does not exist
+	</pre></code>
+		
+	<p>Will it return null? An empty object? Will it crash? <i><u>Will other implementations of IHouseRegister behave the same way?</u></i></li>
+</ul>
+
+<h2 id="nullable-reference-types">Nullable reference types</h2>
+
+<p>If you are lucky enough to get to start a brand new dotnet core project: congratulations. By putting <span style="font-family: courier">&lt;Nullable&gt;enable&lt;/Nullable&gt;</span> in your project file,
+	the compiler will automatically disallow any variables from being null. That is, unless you specify their types with a ? at the end.</p>
+
+<code><pre class="prettyprint lang-csharp">
+MyButton? b = GetButton("xyz"); // Can be null
+MyButton b2 = GetButton("xyz"); // Can not be null
+
+b2 = null; // Will not compile.
+
+Log(b.Title); // Will not compile, we have to check for null!
+
+if(b != null)
+{
+	Log(b.Value.Title); // Will compile
+}
+</pre></code>
+
+<h2 id="functional-approaches">Functional approaches</h2>
+
+<p>In Haskell, every operation that might fail is wrapped in another object. We can use this approach too, to make the code more clear:</p>
+
+<code><pre class="prettyprint lang-csharp">
+public struct Maybe<T> where T : class
+{
+	public T Value { get; private set; }
+	public bool HasValue { get; private set; }
+
+	public Maybe(T value)
+	{
+		Value = value;
+		HasValue = (value != null);
+	}
+}
+</pre></code>
+
+<code><pre class="prettyprint lang-csharp">
+// Some service we provide
+public Maybe<string> FindFirstCurse(string text)
+{
+	int cursePosition = text.IndexOf("darn");
+	if(cursePosition > -1)
+	{
+		return new Maybe(text.Substring(cursePosition, 4));
+	}
+	return new Maybe(null);
+}
+
+// Using the service
+var curse = FindFirstCurse("I dont give a darn");
+if(curse.HasValue)
+{
+	Log($"You cursed: {curse.Value}");
+}
+else
+{
+	Log("You are an angel");
+}
+</pre></code>
+
+<h2 id="lists">Lists</h2>
+
+<p>There is one existing type of objects which does not need to suffer from the null madness: different kinds of lists.
+	If you think about it, a Maybe could be seen as a list with 0-1 elements. Let's look at looping:</p>
+	
+<code><pre class="prettyprint lang-csharp">
+var list = new List<string>();
+var maybe = new Maybe<string>();
+
+foreach(var s in list) {
+	Log(s);
+}
+
+if(maybe.HasValue) {
+	Log(maybe.Value);
+}
+</pre></code>
+
+<p>Now imagine, during development the list is passed from somewhere else; and you get a NullPointerException on the foreach loop.
+Your reflex might be to just add a null check, but that would be wrong.</p>
+
+<code><pre class="prettyprint lang-csharp">
+if(myList != null) // This belongs with the code initializing myList, not here
+{
+	foreach(var item in myList)
+	{
+		// ...
+	}
+}
+</pre></code>
+
+<p>Lists should never be allowed to be null. There is no purpose or point in it. Instead of adding a null check directly in the code, you should put in the work and track the source of the list.
+It is clearly doing its job poorly.</p>
+
+<p>The only place where a null-check would be appropriate is if you recieve the list from an external source. However, your first priority should then be to create an instance of a list anyway,
+so that the rest of your program can trust lists to always be initialized.</p>

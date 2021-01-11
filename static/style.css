@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Merriweather');
+@import url('https://fonts.googleapis.com/css?family=Merriweather&display=swap');
 /* media screen size blah blah... */
 
 @media (max-width: 599px) {
@@ -15,7 +15,7 @@
 
 @media (min-width: 600px) and (max-width: 859px) {
 	#container {
-		padding: 20px 50px;
+		padding: 20px 80px;
 	}
 	body {
 		background-color: #fefefe;
@@ -27,8 +27,8 @@
 
 @media (min-width: 860px) {
 	#container {
-		width: 760px;
-		padding: 20px 50px;
+		width: 700px;
+		padding: 20px 80px;
 		margin: 0px auto;
 	}
 	body {
@@ -103,6 +103,7 @@ td, th {
 	text-align: center;
 	margin-top: 0px;
 	/* Stupid, but might cause #container to not be placed at top of page otherwise */
+	margin-bottom: 0px;
 	font-size: 40px;
 }
 
@@ -111,11 +112,18 @@ td, th {
 	color: #444;
 }
 
+#title-container {
+	position: relative;
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
 #subtitle {
 	display: block;
 	font-size: 12px;
 	font-style: italic;
 	font-weight: normal;
+	margin-top: 1em;
 }
 
 .tag-container .tag {
@@ -130,15 +138,14 @@ td, th {
 
 .article-brief {
 	border-bottom: 1px solid #ddd;
-	margin-bottom: 20px;
+	margin-bottom: 30px;
+	padding-bottom: 10px;
 }
 
 .article-date {
-	color: #888;
+	color: #aaa;
 	font-size: 14px;
 	font-style: italic;
-	margin-right: 10px;
-	margin-top: 6px;
 	display: inline-block;
 }
 
@@ -148,8 +155,8 @@ td, th {
 }
 
 .article-list section h2 {
-	margin-bottom: 0px;
-	margin-top: 0px;
+	margin-bottom: 0.5em;
+	margin-top: 0.1em;
 }
 
 .article-list section p {
@@ -171,6 +178,10 @@ article h2 {
 
 #article-index {
 	font-family: 'Merriweather', sans-serif;
+	margin-bottom: -30px;
+}
+#article-index li {
+	margin-bottom: 0.1em;
 }
 
 .important-note {
@@ -187,6 +198,8 @@ hr.nice {
 	border: 0px solid #999;
 	text-align: center;
 	line-height: 0px;
+	margin-top: 2em;
+	margin-bottom: 2em;
 }
 
 hr.nice:after {

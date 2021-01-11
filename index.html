@@ -2,23 +2,14 @@
 <html lang="en">
 
 <head>
-	<meta charset="utf8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	#head#
 	<meta name="description" content="Short rambles about programming patterns, software architecture, and c0de.">
 	<title>Lissel's code blog</title>
-	<script async src="common.js"></script>
-	<script async
-		src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?skin=sunburst"></script>
-	<link rel="stylesheet" href="style.css" />
-	<link rel="alternate" type="application/rss+xml" title="Get updates about c0de automatically!" href="https://www.lissel.net/lissel.rss" />
 </head>
 
 <body>
 	<div id="container">
-		<div style="position: relative">
-			<a href="lissel.rss" style="position: absolute; top: 10px; right: 0px;"><img src="rss.png" alt="rss icon" /></a>
-			<h1 id="title">Lissel's code blog:<span id="subtitle">Short rambles about c0de</span></h1>
-		</div>
+		#title-container#
 
 		<hr class="nice" />
 
@@ -29,16 +20,12 @@
 		<hr class="nice" />
 		<section id="about">
 			<h2>About me</h2>
-			<p>Name's Erik Lissel, and I'm <span id="age"></span> years old. I am crazy about programming&nbsp;patterns
-				and making code that has as low complexity as possible. I am currently very warm towards JavaScript and
-				the
-				functional patterns it enables.
-				I work as a consultant programmer at <a href="">Consid</a> in Örebro, Sweden.
-				When I'm
-				not staring at a screen I enjoy: downhill&nbsp;skiing,
+			<p>My name is Erik Lissel, and I am <span id="age"></span> years old. I am crazy about
+				programming&nbsp;patterns and making code that has as low complexity as possible. I am currently very warm towards JavaScript and
+				the	functional patterns it enables.	I work as a consultant programmer at <a id="work" href="">_</a> in Örebro, Sweden.
+				When I am not staring at a screen I enjoy: downhill&nbsp;skiing,
 				tabletop&nbsp;games, and singing. I also do physical exercise several times a week to keep the mind and
-				body
-				sharp.</p>
+				body sharp.</p>
 		</section>
 
 		<script>
@@ -47,6 +34,17 @@
 				var ageDiffMs = new Date().getTime() - new Date("1988-07-08").getTime(); // Feel free to send edible presents.
 				var ageDate = new Date(ageDiffMs);
 				age.innerHTML = Math.abs(ageDate.getUTCFullYear() - 1970);
+			})();
+
+			(function () {
+				var a = document.querySelector("#work");
+				if (new Date().getTime() > new Date("2020-02-15").getTime()) {
+					a.innerHTML = "Consid";
+					a.href = "https://www.consid.se";
+				} else {
+					a.innerHTML = "Impera";
+					a.href = "https://impera.se";
+				}
 			})();
 		</script>
 

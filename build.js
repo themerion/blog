@@ -37,6 +37,8 @@ function build() {
 }
 
 function generateArticle(article, articleTemplate) {
+    let headHtml = fs.readFileSync("headTemplate.html", 'utf8');
+    let titleContainerHtml = fs.readFileSync("titleContainerTemplate.html", 'utf8');
     let raw = fs.readFileSync(article.localPath, 'utf8');
     let { content, title, meta, date, tags } = parseArticleTwig(raw, article.name);
     let articleHtml = articleTemplate
@@ -45,6 +47,8 @@ function generateArticle(article, articleTemplate) {
         .replace(/#created#/, generateDateHtml(date))
         .replace(/#meta#/, meta)
         .replace(/#tags#/, "" /*generateTagsHtml(tags)*/)
+        .replace(/#head#/, headHtml)
+        .replace(/#title-container#/, titleContainerHtml)
         ;
 
     fs.writeFileSync("dist/" + article.name, articleHtml);
@@ -64,13 +68,20 @@ function generateIndexHtml(articleMetas) {
         <section>
             ${articleMetas.map(x => `<div class="article-brief">
                 ${/*<div>${generateTagsHtml(x.tags)}</div>*/""}
-                <h2><a href="${x.fileName}">${x.title}</a></h2>
                 <div>${generateDateHtml(x.date)}</div>
+                <h2><a href="${x.fileName}">${x.title}</a></h2>
                 <p><a href="${x.fileName}">${x.meta}</a></p>
             </div>`).join("")}
         </section>
     `);
-    indexHtml = indexHtml.replace(/#article-list#/, articleListHtml);
+
+    let headHtml = fs.readFileSync("headTemplate.html", 'utf8');
+    let titleContainerHtml = fs.readFileSync("titleContainerTemplate.html", 'utf8');
+
+    indexHtml = indexHtml
+        .replace(/#article-list#/, articleListHtml)
+        .replace(/#head#/, headHtml)
+        .replace(/#title-container#/, titleContainerHtml);
     fs.writeFileSync("dist/index.html", indexHtml);
 }
 
