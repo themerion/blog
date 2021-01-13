@@ -1,47 +1,6 @@
 @import url('https://fonts.googleapis.com/css?family=Merriweather&display=swap');
 /* media screen size blah blah... */
 
-@media (max-width: 599px) {
-	#container {
-		padding: 20px 20px;
-	}
-	body {
-		background-color: #fefefe;
-	}
-	#about p {
-		text-align: left;
-	}
-}
-
-@media (min-width: 600px) and (max-width: 859px) {
-	#container {
-		padding: 20px 80px;
-	}
-	body {
-		background-color: #fefefe;
-	}
-	#about p {
-		text-align: justify;
-	}
-}
-
-@media (min-width: 860px) {
-	#container {
-		width: 700px;
-		padding: 20px 80px;
-		margin: 0px auto;
-	}
-	body {
-		background: linear-gradient(to top right, lightsalmon, papayawhip);
-		background-repeat: none;
-		background-attachment: fixed;
-		height: 100%;
-	}
-	#about p {
-		text-align: justify;
-	}
-}
-
 @import url('https://fonts.googleapis.com/css?family=Source+Code+Pro');
 /* Normal settings */
 
@@ -98,6 +57,11 @@ tr:nth-child(even) {
 td, th {
 	border: 0px grey solid;
 	padding: 5px;
+}
+
+.command {
+	font-family: courier;
+	white-space: nowrap;
 }
 
 #container {
@@ -190,6 +154,8 @@ article h2 {
 }
 
 .important-note {
+	padding-left: 0.5em;
+	padding-right: 0.5em;
 	margin-left: 20px;
 	margin-right: 20px;
 	background-color: lightsalmon;
@@ -227,4 +193,49 @@ hr.nice:after {
 .tab-button {
 	margin-left: 10px;
 	cursor: pointer;
+}
+
+@media (max-width: 599px) {
+	#container {
+		padding: 20px 20px;
+	}
+	body {
+		background-color: #fefefe;
+	}
+	#about p {
+		text-align: left;
+	}
+	.important-note {
+		margin-left: 10px;
+		margin-right: 10px;
+	}
+}
+
+@media (min-width: 600px) and (max-width: 859px) {
+	#container {
+		padding: 20px 80px;
+	}
+	body {
+		background-color: #fefefe;
+	}
+	#about p {
+		text-align: justify;
+	}
+}
+
+@media (min-width: 860px) {
+	#container {
+		width: 700px;
+		padding: 20px 80px;
+		margin: 0px auto;
+	}
+	body {
+		background: linear-gradient(to top right, lightsalmon, papayawhip);
+		background-repeat: none;
+		background-attachment: fixed;
+		height: 100%;
+	}
+	#about p {
+		text-align: justify;
+	}
 }
