@@ -3,15 +3,8 @@
 #created# 2020-10-12
 #tags# C#
 
-<ol id="article-index">
-	<li><a href="#tldr">tl;dr</a></li>
-	<li><a href="#fail-fast-principle">Fail fast principle</a></li>
-	<li><a href="#can-variable-x-be-null">Can variable X be null...?</a></li>
-	<li><a href="#functional-approaches">Functional approaches</a></li>
-	<li><a href="#lists">Lists</a></li>
-</ol>
 
-<h2 id="tldr">tl;dr</h2>
+#heading# tl;dr
 
 <p>Lists should never be allowed to be null, this is a code smell:</p>
 
@@ -25,7 +18,8 @@ if(myList != null)
 }
 </pre></code>
 
-<h2 id="fail-fast-principle">The fail-fast principle</h2>
+
+#heading# The fail-fast principle
 
 <p><a href="https://en.wikipedia.org/wiki/Fail-fast">The fail-fast principle</a> states that it is better for a program to crash early, if it has encountered an erroneous state.</p>
 
@@ -38,12 +32,13 @@ if(myList != null)
 <p>A program crashes with a NullPointerException only when you try to <u>access a member</u> of the null valued variable.
  Allowing unchecked nulls in the code violates the <b>fail fast principle</b>.</p>
 
-<h2 id="can-variable-x-be-null">Can variable x be null...?</h2>
+
+ #heading# Can variable x be null...?
 
 	<p>Looking at any code (that you did not write yourself 5 minutes ago), you always have to wonder: should I null check this? Can this variable be null?
 		This is stealing focus from what you should be thinking: how can I achieve my clients' goals?</p>
 
-	<p>The point above is even worse for public interfaces:
+	<p>The point above is even worse for <b>interfaces</b>:
 	<code><pre class="prettyprint lang-csharp">
 public interface IHouseRegister {
 	House GetHouseByPostalCode(string code);
@@ -61,25 +56,25 @@ var house = houseRegister.GetHouseByPostalCode("AAA"); // AAA does not exist
 	the compiler will automatically disallow any variables from being null. That is, unless you specify their types with a ? at the end.</p>
 
 <code><pre class="prettyprint lang-csharp">
-MyButton? b = GetButton("xyz"); // Can be null
-MyButton b2 = GetButton("xyz"); // Can not be null
+MyButton button = GetButton("xyz");
+button = null; // Will not compile.
+Log(button.Title) // No problem, button can never be null
 
-b2 = null; // Will not compile.
-
-Log(b.Title); // Will not compile, we have to check for null!
-
-if(b != null)
+MyButton? nullableButton = GetButton("xyz");
+Log(nullableButton.Title); // Will not compile, we have to check for null!
+if(nullableButton != null)
 {
-	Log(b.Value.Title); // Will compile
+	Log(nullableButton.Value.Title); // Will compile
 }
 </pre></code>
 
-<h2 id="functional-approaches">Functional approaches</h2>
+
+#heading# Functional approaches
 
 <p>In Haskell, every operation that might fail is wrapped in another object. We can use this approach too, to make the code more clear:</p>
 
 <code><pre class="prettyprint lang-csharp">
-public struct Maybe<T> where T : class
+public struct Maybe&lt;T&gt; where T : class
 {
 	public T Value { get; private set; }
 	public bool HasValue { get; private set; }
@@ -94,7 +89,7 @@ public struct Maybe<T> where T : class
 
 <code><pre class="prettyprint lang-csharp">
 // Some service we provide
-public Maybe<string> FindFirstCurse(string text)
+public Maybe&lt;string&gt; FindFirstCurse(string text)
 {
 	int cursePosition = text.IndexOf("darn");
 	if(cursePosition > -1)
@@ -116,14 +111,15 @@ else
 }
 </pre></code>
 
-<h2 id="lists">Lists</h2>
+
+#heading# Lists
 
 <p>There is one existing type of objects which does not need to suffer from the null madness: different kinds of lists.
 	If you think about it, a Maybe could be seen as a list with 0-1 elements. Let's look at looping:</p>
 	
 <code><pre class="prettyprint lang-csharp">
-var list = new List<string>();
-var maybe = new Maybe<string>();
+var list = new List&lt;string&gt;();
+var maybe = new Maybe&lt;string&gt;();
 
 foreach(var s in list) {
 	Log(s);
@@ -134,7 +130,7 @@ if(maybe.HasValue) {
 }
 </pre></code>
 
-<p>Now imagine, during development the list is passed from somewhere else; and you get a NullPointerException on the foreach loop.
+<p>Now imagine, during development the list is passed from somewhere else; and you get a <span style="font-family: courier">NullPointerException</span> on the foreach loop.
 Your reflex might be to just add a null check, but that would be wrong.</p>
 
 <code><pre class="prettyprint lang-csharp">

@@ -3,15 +3,9 @@
 #created# 2019-03-12
 #tags# javascript, data-handling
 
-	<ol id="article-index">
-		<li><a href="#tldr">tl;dr</a></li>
-		<li><a href="#compare-function">Array.sort's compare function</a></li>
-		<li><a href="#sort-numbers">Sorting numbers and Math.sign</a></li>
-		<li><a href="#or-operator">The || operator</a></li>
-		<li><a href="#composing-functions">Composing compare-functions</a></li>
-	</ol>
 
-	<h2 id="tldr">tl;dr</h2>
+#heading# tl;dr
+
 	<div class="tab-pane">
 		<div class="tab" data-title="Sleek">
 			<code><pre class="prettyprint lang-js">
@@ -55,7 +49,9 @@ function compareAge(a,b) {
 		</div>
 	</div>
 
-	<h2>Situation</h2>
+
+#heading# Situation
+
 	<p>You have an array of persons:</p>
 	<code><pre class="prettyprint lang-js">
 let persons = [
@@ -68,7 +64,9 @@ let persons = [
 		name
 		(alphabetically), and people with the same name are sorted with age (ascending).</p>
 
-	<h2 id="compare-function">Array.sort's compare function</h2>
+
+#heading# Array.sort compare function
+
 	<p>In order to sort an array of objects, we need to supply a <a
 			href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort"><b>compare
 				function</b></a>.
@@ -118,7 +116,9 @@ function compareAge(obj1, obj2) {
 
 persons.sort(compareAge);</pre></code>
 
-	<h2 id="sort-numbers">Sorting numbers and math.sign</h2>
+
+#heading# Sorting numbers and math.sign
+
 	<p>There is a nicer way to create a comparison function for numbers:</p>
 	<code><pre class="prettyprint lang-js">
 function compareAge(obj1, obj2) {

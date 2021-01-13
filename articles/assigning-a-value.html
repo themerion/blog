@@ -3,14 +3,7 @@
 #created# 2020-01-23
 #tags# C#
 
-<ol id="article-index">
-	<li><a href="#tldr">tl;dr</a></li>
-	<li><a href="#if-then-else">If-then-else is awful</a></li>
-	<li><a href="#switch-case">Switch-case is even worse</a></li>
-	<li><a href="#nested-ternaries">Nested-ternaries</a></li>
-</ol>
-
-<h2 id="tldr">tl;dr</h2>
+#heading# tl;dr
 <code><pre class="prettyprint lang-csharp">
 string database =
 	isAdmin ? "masterDB" :
@@ -19,7 +12,7 @@ string database =
 	"userDB";
 </pre></code>
 
-<h2 id="if-then-else">If-then-else is awful</h2>
+#heading# If-then-else is awful
 <p>Let's say you want to assign some values to a variable. A common pattern would look like:</p>
 <code><pre class="prettyprint lang-csharp">
 string myVariable = "";
@@ -48,7 +41,7 @@ if(isAdmin) {
 </pre></code>
 <p>I would however argue that this is worse. The first line now reads: I want to set myVariable to "userDB". Without seeing the other lines, it is no longer obvious that this is the fallback-value. We have introduced complexity (albeit on a minor scale).</p>
 
-<h2 id="switch-case">Switch-case is even worse</h2>
+#heading# Switch-case is even worse
 <p>Look at the complaints about if-then-else. Switch solves almost none of these. The only thing switch is good for is not repeating the conditions, if the different conditions are just <em>comparing the same value</em>.</p>
 <code><pre class="prettyprint lang-csharp">
 string myVariable = "";
@@ -70,7 +63,7 @@ switch(niceConditionVariable) {
 	<li>The <b>syntax is odd</b> in a world that abandoned gotos and labels some twenty years ago!?</li>
 </ul>
 	
-<h2 id="nested-ternaries">Nested ternaries</h2>
+#heading# Nested ternaries
 <p>A common way to structure ternaries is to try indenting them like they were if-then-else statements:</p>
 <code><pre class="prettyprint lang-csharp">
 string myVariable = (isAdmin)

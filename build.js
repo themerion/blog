@@ -9,7 +9,7 @@ function build() {
 
     let articleStatus = {};
 
-    for (let twigName of articleTwigs) {
+    for (let twigName of articleTwigs.filter(x => /\.html$/.test(x))) {
         let localPath = path.join("articles", twigName);
         let stat = fs.statSync(localPath);
         articleStatus[twigName] = {
@@ -21,8 +21,8 @@ function build() {
 
     let articleTemplate = fs.readFileSync("articleTemplate.html", 'utf8');
 
-    if (!fs.existsSync("dist"))
-        fs.mkdirSync("dist");
+    fs.rmdirSync("dist", {recursive: true});
+    fs.mkdirSync("dist");
 
     let articleMetas = [];
     for (let article of Object.values(articleStatus))
@@ -41,9 +41,14 @@ function generateArticle(article, articleTemplate) {
     let titleContainerHtml = fs.readFileSync("titleContainerTemplate.html", 'utf8');
     let raw = fs.readFileSync(article.localPath, 'utf8');
     let { content, title, meta, date, tags } = parseArticleTwig(raw, article.name);
+
+    let [textHeadings, content2] = processTextHeadings(content);
+    let tblContent = generateTableOfContentsHtml(textHeadings);
+    let content3 = tblContent + content2;
+
     let articleHtml = articleTemplate
         .replace(/#title#/g, title) // using /g because of <title> and <h1>
-        .replace(/#content#/, content)
+        .replace(/#content#/, content3)
         .replace(/#created#/, generateDateHtml(date))
         .replace(/#meta#/, meta)
         .replace(/#tags#/, "" /*generateTagsHtml(tags)*/)
@@ -134,6 +139,38 @@ function generateTagsHtml(tags) {
 
 function generateDateHtml(date) {
     return '<span class="article-date">' + date + '</span>';
+}
+
+function processTextHeadings(html) {
+    var headings = [];
+    var lines = html.split("\n");
+    for(let i = 0; i < lines.length; i++) {
+        const headingPos = lines[i].indexOf("#heading#")
+        if(headingPos > -1) {
+            let headingText = lines[i].substring(headingPos + 9).trim();
+            headings.push(headingText);
+            lines[i] = `<h2 id="${generateIdFromHeading(headingText)}">${headingText}</h2>`;
+        }
+    }
+    return [headings, lines.join("\n")];
+}
+
+function generateIdFromHeading(heading) {
+    return heading
+        .toLowerCase()
+        .replace(/ /g,"-")
+        .replace(/[!?&.,;:]/g,"");
+}
+
+function generateTableOfContentsHtml(textHeadings) {
+    if(!textHeadings || !textHeadings.length)
+        return "";
+
+    let rows = "";
+    for(let x of textHeadings) {
+        rows += '<li><a href="#'+generateIdFromHeading(x)+'">'+x+'</a></li>';
+    }
+    return '<ol id="article-index">'+rows+'</ol>';
 }
 
 function generateRssFeed(articleMetas) {
