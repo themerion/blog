@@ -1,0 +1,36 @@
+on:
+  push:
+    branches: [ main ]
+  pull_requests:
+    branches: [ main ]
+
+jobs:
+  FTP-Deploy-Action:
+    name: FTP-Deploy-Action
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Use Node.js 12.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+        
+    - name: Build Project
+      run: |
+        npm install
+        node build.js
+        
+    - name: List output files
+      run: ls dist
+      
+    # - name: FTP-Deploy-Action
+    #   uses: SamKirkland/FTP-Deploy-Action@2.0.0
+    #   env:
+    #     FTP_SERVER: ${{ secrets.FTP_SERVER }}
+    #     FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+    #     FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+    #     LOCAL_DIR: dist
+    #     METHOD: sftp
+    #     PORT: 22
+    #     ARGS: --delete
