@@ -18,6 +18,18 @@ if(myList != null)
 }
 </pre></code>
 
+#heading# Null checking lists
+
+<p>Let's say you are working on <i>Class B</i>. An error occurs where a list turns out to be null. The list is given to you from <i>Class A</i>.</p>
+
+<p>After some digging, you discover that the list originates from a web request:</p>
+
+<div style="text-align: center">
+	<img src="nullable_list.svg" />
+</div>
+
+<p>The correct thing to do would be to make sure that <i>HouseController</i> cannot pass a null-valued list. Either, an empty list should be created in <i>HouseController</i>, or <i>HouseController</i> should deny the web request.</p>
+
 
 #heading# The fail-fast principle
 
@@ -50,28 +62,28 @@ var house = houseRegister.GetHouseByPostalCode("AAA"); // AAA does not exist
 	<p>Will it return null? An empty object? Will it crash? <i><u>Will other implementations of IHouseRegister behave the same way?</u></i></li>
 </ul>
 
-<h2 id="nullable-reference-types">Nullable reference types</h2>
-
-<p>If you are lucky enough to get to start a brand new dotnet core project: congratulations. By putting <span style="font-family: courier">&lt;Nullable&gt;enable&lt;/Nullable&gt;</span> in your project file,
-	the compiler will automatically disallow any variables from being null. That is, unless you specify their types with a ? at the end.</p>
-
-<code><pre class="prettyprint lang-csharp">
-MyButton button = GetButton("xyz");
-button = null; // Will not compile.
-Log(button.Title) // No problem, button can never be null
-
-MyButton? nullableButton = GetButton("xyz");
-Log(nullableButton.Title); // Will not compile, we have to check for null!
-if(nullableButton != null)
-{
-	Log(nullableButton.Value.Title); // Will compile
-}
-</pre></code>
-
 
 #heading# Functional approaches
 
 <p>In Haskell, every operation that might fail is wrapped in another object. We can use this approach too, to make the code more clear:</p>
+
+<div class="tab-pane">
+	<div class="tab" data-title="Usage Example">
+
+<code><pre class="prettyprint lang-csharp">
+public interface IHouseRegister {
+	Maybe&lt;House&gt; GetHouseByPostalCode(string code);
+}
+
+var maybeHouse = houseRegister.GetHouseByPostalCode("AAA");
+if(maybeHouse.HasValue) {
+	var house = maybeHouse.Value;
+	// Do stuff...
+}
+</pre></code>
+
+</div>
+<div class="tab" data-title="Maybe Implementation">
 
 <code><pre class="prettyprint lang-csharp">
 public struct Maybe&lt;T&gt; where T : class
@@ -85,36 +97,27 @@ public struct Maybe&lt;T&gt; where T : class
 		HasValue = (value != null);
 	}
 }
-</pre></code>
+	</pre></code>
+</div>
+</div>
+
+
+<h2 id="nullable-reference-types">Nullable reference types</h2>
+
+<p>If you are lucky enough to get to start a brand new dotnet core project: congratulations. By putting <span style="font-family: courier">&lt;Nullable&gt;enable&lt;/Nullable&gt;</span> in your project file,
+	the compiler will automatically disallow any variables from being null. That is, unless you specify their types with a ? at the end.</p>
 
 <code><pre class="prettyprint lang-csharp">
-// Some service we provide
-public Maybe&lt;string&gt; FindFirstCurse(string text)
-{
-	int cursePosition = text.IndexOf("darn");
-	if(cursePosition > -1)
-	{
-		return new Maybe(text.Substring(cursePosition, 4));
-	}
-	return new Maybe(null);
-}
-
-// Using the service
-var curse = FindFirstCurse("I dont give a darn");
-if(curse.HasValue)
-{
-	Log($"You cursed: {curse.Value}");
-}
-else
-{
-	Log("You are an angel");
+public interface IHouseRegister {
+	// A function that, per definition, can return null.
+	House? GetHouseByPostalCode(string code);
 }
 </pre></code>
 
 
 #heading# Lists
 
-<p>There is one existing type of objects which does not need to suffer from the null madness: different kinds of lists.
+<p>There exists one type of objects which does not need to suffer from the null madness: lists.
 	If you think about it, a Maybe could be seen as a list with 0-1 elements. Let's look at looping:</p>
 	
 <code><pre class="prettyprint lang-csharp">

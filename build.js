@@ -40,7 +40,7 @@ function generateArticle(article, articleTemplate) {
     let headHtml = fs.readFileSync("headTemplate.html", 'utf8');
     let titleContainerHtml = fs.readFileSync("titleContainerTemplate.html", 'utf8');
     let raw = fs.readFileSync(article.localPath, 'utf8');
-    let { content, title, meta, date, tags } = parseArticleTwig(raw, article.name);
+    let { content, title, meta, date } = parseArticleTwig(raw, article.name);
 
     let [textHeadings, content2] = processTextHeadings(content);
     let tblContent = generateTableOfContentsHtml(textHeadings);
@@ -51,7 +51,6 @@ function generateArticle(article, articleTemplate) {
         .replace(/#content#/, content3)
         .replace(/#created#/, generateDateHtml(date))
         .replace(/#meta#/, meta)
-        .replace(/#tags#/, "" /*generateTagsHtml(tags)*/)
         .replace(/#head#/, headHtml)
         .replace(/#title-container#/, titleContainerHtml)
         ;
@@ -62,7 +61,6 @@ function generateArticle(article, articleTemplate) {
         title: title,
         meta: meta,
         date: date,
-        tags: tags,
         fileName: article.name
     };
 }
@@ -72,7 +70,6 @@ function generateIndexHtml(articleMetas) {
     let articleListHtml = (`
         <section>
             ${articleMetas.map(x => `<div class="article-brief">
-                ${/*<div>${generateTagsHtml(x.tags)}</div>*/""}
                 <div>${generateDateHtml(x.date)}</div>
                 <h2><a href="${x.fileName}">${x.title}</a></h2>
                 <p><a href="${x.fileName}">${x.meta}</a></p>
@@ -125,16 +122,8 @@ function parseArticleTwig(twig, twigName) {
         content: twig.substring(contentStart),
         title: parseField("title"),
         meta: parseField("meta"),
-        date: parseField("created"),
-        tags: parseField("tags").split(",").map(x => x.trim()),
+        date: parseField("created")
     };
-}
-
-function generateTagsHtml(tags) {
-    return (
-        '<span class="tag-container">' +
-        tags.map(tag => '<span class="tag">' + tag + '</span>').join("") +
-        '</span>');
 }
 
 function generateDateHtml(date) {

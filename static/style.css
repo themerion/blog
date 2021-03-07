@@ -1,31 +1,84 @@
+/* Breakpoints:
+*    0-599px
+*    600-859px
+*    850px-inf
+*/
+
 @import url('https://fonts.googleapis.com/css?family=Merriweather&display=swap');
 /* media screen size blah blah... */
 
 @import url('https://fonts.googleapis.com/css?family=Source+Code+Pro');
 /* Normal settings */
 
-html {
-	height: 100%;
+/* =====================
+*		_TITLE
+* ====================== */
+
+#title-container {
+	position: relative;
+	padding-left: 20px;
+	padding-right: 20px;
 }
 
-body {
+#title {
+	text-align: center;
+	margin-top: 0px;
+	/* Stupid, but might cause #container to not be placed at top of page otherwise */
+	margin-bottom: 0px;
+	font-size: 40px;
+}
+
+#title a {
+	text-decoration: none;
 	color: #444;
-	margin: 0px;
 }
 
-h1, h2 {
-	font-family: sans-serif;
+/* ---------- */
+
+@keyframes subtitle-fade-in-delayed {
+	0% { opacity: 0%; }
+	60% { opacity: 0%; }
+	100% { opacity: 100%; }
 }
 
-p, ul, ol, li, dd, dl, dt {
-	font-family: 'Merriweather', sans-serif;
-	font-size: 16px;
-	line-height: 190%;
+#subtitle {
+	display: block;
+	font-size: 12px;
+	font-style: italic;
+	font-weight: normal;
+	margin-top: 1em;
+
+	animation-name: subtitle-fade-in-delayed;
+	animation-timing-function: linear;
+	animation-duration: 3.5s;
 }
+
+/* ---------- */
+
+@keyframes supertitle-from-top {
+	0% { opacity: 0%; }
+	20% { transform: translateY(-50px); opacity: 0%; }
+	100% { transform: translateY(0px); opacity: 100%; }
+}
+
+#supertitle {
+	display: inline-block; /* Requirement for using transform-animations */
+
+	animation-name: supertitle-from-top;
+	animation-timing-function: ease-out;
+	animation-duration: 2.5s;
+}
+
+
+/* ======================
+*	_ARTICLE COMPONENTS
+* ===================== */
 
 li {
 	margin-bottom: 1em;
 }
+
+/* ------------- */
 
 pre {
 	font-family: "Source Code Pro", "Courier New", "Courier";
@@ -36,6 +89,8 @@ pre {
 pre.prettyprint {
 	white-space: pre !important;
 }
+
+/* ------------- */
 
 table {
 	border-collapse: collapse;
@@ -59,40 +114,64 @@ td, th {
 	padding: 5px;
 }
 
+/* ------------ */
+
 .command {
 	font-family: courier;
 	white-space: nowrap;
 }
 
+/* ------------ */
+
+.important-note {
+	padding-left: 0.5em;
+	padding-right: 0.5em;
+	margin-left: 20px;
+	margin-right: 20px;
+	background-color: lightsalmon;
+	font-size: larger;
+	box-shadow: 5px 5px 5px grey;
+}
+
+@media (max-width: 599px) {
+	.important-note {
+		margin-left: 10px;
+		margin-right: 10px;
+	}
+}
+
+/* ------------ */
+
+.tab-button {
+	margin-left: 10px;
+	cursor: pointer;
+}
+
+/* ==========================
+*     _LAYOUT
+* =========================== */
+
+html {
+	height: 100%;
+}
+
+body {
+	color: #444;
+	margin: 0px;
+}
+
+h1, h2 {
+	font-family: sans-serif;
+}
+
+p, ul, ol, li, dd, dl, dt {
+	font-family: 'Merriweather', sans-serif;
+	font-size: 16px;
+	line-height: 190%;
+}
+
 #container {
 	background: #fefefe;
-}
-
-#title {
-	text-align: center;
-	margin-top: 0px;
-	/* Stupid, but might cause #container to not be placed at top of page otherwise */
-	margin-bottom: 0px;
-	font-size: 40px;
-}
-
-#title a {
-	text-decoration: none;
-	color: #444;
-}
-
-#title-container {
-	position: relative;
-	padding-left: 20px;
-	padding-right: 20px;
-}
-
-#subtitle {
-	display: block;
-	font-size: 12px;
-	font-style: italic;
-	font-weight: normal;
-	margin-top: 1em;
 }
 
 .tag-container .tag {
@@ -153,17 +232,19 @@ article h2 {
 	margin-bottom: 0.1em;
 }
 
-.important-note {
-	padding-left: 0.5em;
-	padding-right: 0.5em;
-	margin-left: 20px;
-	margin-right: 20px;
-	background-color: lightsalmon;
-	font-size: larger;
-	box-shadow: 5px 5px 5px grey;
-}
+
 
 /* Adapted from https://codepen.io/ibrahimjabbari/pen/ozinB */
+
+@keyframes hr-start {
+	0% { transform: rotate(60deg); }
+	100% { transform: rotate(240deg) scale(175%); }
+}
+
+@keyframes hr-stop {
+	0% { transform: rotate(240deg) scale(175%); }
+	100% { transform: rotate(420deg); }
+}
 
 hr.nice {
 	border: 0px solid #999;
@@ -183,16 +264,12 @@ hr.nice:after {
 	color: #999;
 	font-size: 22px;
 	font-weight: bold;
-	-webkit-transform: rotate(60deg);
-	-moz-transform: rotate(60deg);
 	transform: rotate(60deg);
-}
 
-/* ===== TABS ====== */
-
-.tab-button {
-	margin-left: 10px;
-	cursor: pointer;
+	animation-name: hr-start, hr-stop;
+	animation-duration: 1.5s, 1.5s;
+	animation-delay: 0s, 1.5s;
+	animation-timing-function: ease-in, ease-out;
 }
 
 @media (max-width: 599px) {
@@ -204,10 +281,6 @@ hr.nice:after {
 	}
 	#about p {
 		text-align: left;
-	}
-	.important-note {
-		margin-left: 10px;
-		margin-right: 10px;
 	}
 }
 
@@ -230,7 +303,7 @@ hr.nice:after {
 		margin: 0px auto;
 	}
 	body {
-		background: linear-gradient(to top right, lightsalmon, papayawhip);
+		background: linear-gradient(to top right, #0df, papayawhip, #0df);
 		background-repeat: none;
 		background-attachment: fixed;
 		height: 100%;
