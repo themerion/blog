@@ -136,7 +136,9 @@ function compareAge(obj1, obj2) {
 	return Math.sign(obj1.age - obj2.age);
 }</pre></code>
 
-	<h2 id="or-operator">The || operator</h2>
+
+#heading# The || operator
+
 	<p>In most programming languages, the || operator is reserved for boolean operations. In JavaScript,
 		it is
 		much more powerful.</p>
@@ -159,7 +161,9 @@ let c = getErrorMessage() || ""
 	<p>More info on <a href="https://developer.mozilla.org/en-US/docs/Glossary/Falsy">falsy
 			values</a>.</p>
 
-	<h2 id="composing-functions">Composing compare-functions</h2>
+
+#heading#Composing compare-functions
+
 	<p>Since a compare function will return 0 (a falsy value) only when the order doesn't matter, we can
 		chain compare functions with ||. This allows us to simply think about sorting one property at a
 		time.</p>
