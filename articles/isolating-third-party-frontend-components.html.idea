@@ -1,0 +1,30 @@
+#title# Isolating third party frontend components
+#meta# Best practices for keeping your code manageable
+#created# 2021-08-01
+#tags# javascript, react
+
+
+#heading# tl;dr
+
+<p>Put all third party components inside wrapper components that you create yourself. This decreases coupling, and might also improve readability and specificity.</p>
+
+<code><pre class="prettyprint lang-js">
+function App() {
+    return &lt;MyOwnCheckbox title="Opt-in" /&gt;
+}
+
+function MyOwnCheckbox(title) {
+    return &lt;div class="my-own-checkbox"&gt;
+        &lt;span&gt;{title}&lt;/span&gt;
+        &lt;BootstrapFormControl
+            type="checkbox"
+            size-adjustment="5"
+            color-scheme="cyan"
+            obnoxious-attribute="arthur-dent"
+        /&gt;
+    &lt;/div&gt;;
+           
+}
+</pre></code>
+
+#heading# The problem
