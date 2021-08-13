@@ -1,0 +1,14 @@
+#title# Working with bad code
+#meta# Making progress and keeping (most of) your sanity
+#created# 2021-08-01
+#tags# C#
+
+
+#heading# tl;dr
+
+<ul>
+    <li>Define new interfaces on top of the old ones</li>
+    <li>First, insert your changes in an ugly way</li>
+    <li>Write tests</li>
+    <li>Refactor from services/managers to stateless components</li>
+</ul>
