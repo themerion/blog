@@ -1,0 +1,189 @@
+#title# Isolating third party frontend components
+#meta# Best practices for keeping your code manageable
+#created# 2021-08-01
+#tags# javascript, react
+
+
+#heading# tl;dr
+
+<p>Put all third party components inside wrapper components that you create yourself. This decreases coupling, and might also improve readability and specificity.</p>
+
+<code><pre class="prettyprint lang-js">
+function View() {
+    return &lt;MyOwnCheckbox title="Opt-in" /&gt;
+}
+
+/* Hide away dependency on BootstrapFormControl */
+
+function MyOwnCheckbox(props) {
+    return &lt;div class="my-own-checkbox"&gt;
+        &lt;span&gt;{props.title}&lt;/span&gt;
+        &lt;BootstrapFormControl
+            type="checkbox"
+            size-adjustment="5"
+            color-scheme="cyan"
+            obnoxious-attribute="arthur-dent"
+        /&gt;
+    &lt;/div&gt;;
+           
+}
+</pre></code>
+
+
+#heading# The problem
+
+<p>Front-end is a fast moving landscape of technologies and add-ons. You will always be one step behind the latest version of library X or component Y.</p>
+
+<p>The npm registry does keep all versions of software, so you might think to just stay on an old version. This runs into two problems:</p>
+<ul>
+	<li>You'll miss out on any bug fixes, security- and feature <b>updates</b>.</li>
+	<li><b>Documentation</b> for old versions is usually removed.</li>
+</ul>
+
+<p class="quote">This project seem to have <i>BoostrapFormControl</i> all over the place. I wonder what it does, and how to use it? The documentation disappeared two years ago...</p>
+
+
+#heading# Learning from backend developers
+
+<p>In backend systems, the repository pattern is common. Instead of having your main application code directly calling the database with sql-commands, a repository class is created. The repository class does all the sql-handling.</p>
+
+<h3 style="text-align:center;">Using repository pattern</h3>
+
+<div style="text-align: center">
+	<figure style="margin-bottom: 3em; margin-top: -1em">
+		<img src="backend-with-repository.png" style="max-width: 100%">
+		<figcaption>When coding the application logic, you are exposed to four nicely named functions. The Repository class shields you from the complexities of making SQL requests.</figcaption>
+	</figure>
+</div>
+
+<h3 style="text-align: center;">Without repository pattern</h3>
+
+<div style="text-align: center">
+	<figure style="margin-bottom: 3em; margin-top: -1em">
+		<img src="backend-without-repository.png" style="max-width: 100%">
+		<figcaption>When coding the application logic, you are exposed to all the complexity of the SqlConnection class. Instead of focusing on cats, you'll be stuck thinking about SQL.</figcaption>
+	</figure>
+</div>
+
+<p>Even in a frontend project, you might have classes such as <i>APIService</i> or <i>DataFetcher</i> rather than calling <i>fetch</i> directly from your views or components.</p>
+
+
+#heading# Revisiting frontend
+
+<p>I don't know if it is the legacy of jQuery, but frontend code often tends to look like this:</p>
+
+<code><pre class="prettyprint lang-js">
+function View() {
+	return (&lt;div&gt;
+		&lt;p&gt;Text, whatever&lt;/p&gt;
+		&lt;WickedButtonControl
+			type="color-picker"
+			included-colors="red, green, magentayellow"
+			size=40
+			margins="20,42,02,13"
+			some-other-stuff="true"
+			do-the-smurf-setting="smurf" /&gt;
+	&lt;/div&gt;);
+}
+</pre></code>
+
+<p>Here, the view is dependent on WickedButtonControl. This is the equivalent of coding directly against <i>SqlConnection</i> in the backend example.</p>
+
+<p>What I suggest is to not use the third party <i>WickedButtonControl</i> class directly in your view. Instead, wrap it inside your own component:</p>
+
+<code><pre class="prettyprint lang-js">
+function View() {
+	return (&lt;div&gt;
+		&lt;p&gt;Some info, whatever&lt;/p&gt;
+		&lt;MyColorPicker colors="red, green, magentayellow" /&gt;
+	&lt;/div&gt;);
+}
+</pre></code>
+
+<code><pre class="prettyprint lang-js">
+function MyColorPicker(props) {
+	return &lt;WickedButtonControl
+			type="color-picker"
+			included-colors={props.colors}
+			size=40
+			margins="20,42,02,13"
+			some-other-stuff="true"
+			do-the-smurf-setting="smurf" /&gt;
+}
+</pre></code>
+
+#heading# Easier to change
+
+<p>Let's say we want to remake the color picker, perhaps replace it with another library. Even if this new library expects different inputs, we don't have to change the views. We only have to change our own wrapper-class: MyColorPicker.</p>
+
+<code><pre class="prettyprint lang-js">
+/* The same view code as before. */
+function View() {
+	return (&lt;div&gt;
+		&lt;p&gt;Some info, whatever&lt;/p&gt;
+		&lt;MyColorPicker colors="red, green, magentayellow" /&gt;
+	&lt;/div&gt;);
+}
+
+</pre></code>
+<code><pre class="prettyprint lang-js">
+function MyColorPicker(props) {
+/*
+	We are going to use BootstrapColorPicker,
+	which expects hexadecimal color codes instead of color names
+	which were previously used.
+*/
+	let colorCodes = props.colors
+		.split(",")
+		.map(x => x.trim()) /* Remove any blank spaces */
+		.map(colorNameToColorCode)
+
+	return &lt;BootstrapColorPicker
+			colors={colorCodes}
+			theme="whatever-some-theme" /&gt;;
+}
+
+function colorNameToColorCode(name) {
+	if(name == "red") {
+		return "#ff0000";
+	} else if(name == "green") {
+		return "#00ff00";
+	} /* etc. */
+
+	return "#ffffff";
+}
+</pre></code>
+
+<p>Notice that just by looking at the usage and the props, we can get a pretty good idea of what the component is supposed to do, and what we have to change for the new implementation.</p>
+
+<p class="important-note">The props act as a specification telling you what is expected of MyColorPicker.</p>
+
+#heading# Reduced complexity
+
+<p>Let's say you are using BootstrapPopup, and that BootstrapPopup has 45 different possible settings and props. How many of these will you be using? How many will be relevant for the view code?</p>
+
+<p>By inserting BootstrapPopup directly into your view, you are dragging in the complexity of 45 different possible settings. This makes you view harder to maintain.</p>
+
+<p>Probably, your view only cares about a few things. Like popup text, title and icon. This is a great foundation for defining your own component:</p>
+
+<code><pre class="prettyprint lang-js">
+function View() {
+	return &lt;MyOwnPopup title="hi" icon="warning" message="Welcome to the popup!" /&gt;;
+}
+</pre></code>
+
+<code><pre class="prettyprint lang-js">
+function MyOwnPopup(props) {
+	let iconIndex = props.icon == "warning" ? 1 : 0;
+
+	return &lt;BootstrapPopup
+		title={props.title}
+		icon={iconIndex}
+		message={props.text}
+		padding=20
+		some-other-specific-option=true
+		/&gt;;
+}
+</pre></code>
+
+<p>Notice how the view does not need to care about specific formatting or bootstrap settings. We have reduced the complexity of the view's code.</p>

@@ -123,6 +123,25 @@ td, th {
 
 /* ------------ */
 
+.quote {
+	color: #999999;
+	font-style: italic;
+	font-size: 1.2em;
+	margin-top: 2em;
+	margin-bottom: 2em;
+}
+
+.quote::before {
+	content: "“";
+	font-size: 2em;
+}
+.quote::after {
+	content: "”";
+	font-size: 2em;
+}
+
+/* ------------ */
+
 .important-note {
 	padding-left: 0.5em;
 	padding-right: 0.5em;
