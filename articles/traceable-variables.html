@@ -1,0 +1,229 @@
+#title# Traceable variables
+#meta# Do you know where your variables are coming from?
+#created# 2021-11-14
+#tags# Javascript, CSharp
+
+
+
+#heading# tl;dr
+
+<p>It is easier to maintain code where variables are clearly declared, and preferably close to the place they are being used.</p>
+
+<p>Anything that is implicit is your enemy: inheritance, injections, global state...</p>
+
+
+
+#heading# Codebase hopping is norm
+
+<p>As a professional programmer, you seldom have the luxury of working on the one and same codebase. You are switching between frontend, backend, that overgrown batch job, the backoffice, the app, the search-integrations-project, etc.</p>
+
+<p>Different projects might use different versions of libraries, different code styles, or even different programming languages. You do not have the time to master every aspect of every system. Thus:</p>
+
+<p class="important-note">Code must be easy to read and grasp, even if you are not a master of the framework in use.</p>
+
+
+
+#heading# Traceable variables
+
+<p>To make your code readable, it is important that variables are easily <b>traceable</b>. If you are trying to modify a specific function, you want to spend as little time as possible outside of that function.</p>
+
+<div class="code-header">Example A</div>
+<code><pre class="prettyprint lang-csharp">
+public class PlayButton
+{
+   MatchMaker service;
+
+   public PlayButton()
+   {
+      service = new RoundRobinMatchMaker();
+   }
+
+   // ... some code ...
+
+   // row 153
+   public void Play()
+   {
+       service.execute();
+   }
+}
+</pre></code>
+
+<p>In Example A, trying to understand <code>Play()</code> requires you to first trace the variable <code>service</code>:
+<ol>
+    <li>Find out that it is declared as a member variable of the class.</li>
+    <li>Find the assignment to the variable in the constructor.</li>
+</ol>
+
+<div class="code-header">Example B</div>
+<code><pre class="prettyprint lang-csharp">
+public class PlayButton
+{
+    // ... some code ...
+
+    //row 153
+    public void Play()
+    {
+        var service = new RoundRobinMatchMaker();
+        service.execute();
+    }
+}
+</pre></code>
+
+<p>In Example B no tracing is needed of <code>service</code>. Clearly, the <code>Play()</code>-function in Example B is much easier to reason about!</p>
+
+
+
+#heading# Traceability index
+
+<p>Let's define a measurement for how hard it is to trace a variable:</b>
+
+<p class="important-note" style="text-align: center"><b><u>Traceability Index</u></b><br /> <i>The number of times you have to scroll away or switch context in order to understand the variable.</i></p>
+
+<p>In Example A above, the variable <code>service</code> has traceability index 2; while its index is 0 in Example B.</p>
+
+
+
+#heading# Composition vs. inheritance
+
+<p>Hopefully you are already aware of the bad strong coupling that comes with inheritance. But there are more subtle problems.</p>
+
+<code><pre class="prettyprint lang-csharp">
+class AVector : InstancedVector<List, int>
+{
+   Smurf()
+   {
+       Console.WriteLine("" + list.Isberg);
+   }
+}
+</pre></code>
+
+<p>Where does the variable <code>list</code> come from? The superclass? Which one?</p>
+
+<code><pre class="prettyprint lang-csharp">
+class InstancedVector<T, V> : DeepVector<V> ... 
+    
+class DeepVector<V> : FullVector<V> ...
+
+class FullVector<V> : ArrayVector<V> ...
+</pre></code>
+
+<p>The tracability index of the variable <code>list</code> is potentially greater than 4! Even with a modern development environment, you might catch the declaration but miss a mutation to the variable "deeper down" the inheritance chain.</p>
+
+
+#heading# React hooks
+
+<p>React has recently taken a big step in traceable variables: hooks. Example C is an old style React class.</p>
+
+<div class="code-header">Example C</div>
+<code><pre class="prettyprint lang-javascript">
+import 'react-redux';
+import 'react-router';
+
+const mapStateToProps = (state) => ({
+    user: state.user,
+    matchesPlayed: state.matchesPlayed
+});
+
+@injectRouter
+@connect(mapStateToProps)
+class Dude extends React.Component {
+   render() {
+      return &lt;p&gt;{this.props.user.name} is on {this.props.<b style="background-color: red">match.location</b>} &lt;/p&gt; 
+   }
+}
+</pre></code>
+
+<p><code>match.location</code> is not traceable at all! The traceability index is infinity.</p>
+
+<div class="code-header">Example D</div>
+<code><pre class="prettyprint lang-javascript">
+import { useLocation } from 'react-router';
+import { useSelector } from 'react-redux';
+
+function Dude() {
+    const user = useSelector(store => store.user);
+    const matchesPlayed = useSelector(store => store.matchesPlayed);
+
+    const location = useLocation();
+
+    return &lt;p&gt;{user.name} is on {location} &lt;/p&gt;
+}
+</pre></code>
+
+<p>In Example D, you can trace the variable <code>location</code>, with traceability index 2:
+<ol>
+    <li><code>location</code> comes from <code>useLocation()</code></li>
+    <li><code>useLocation</code> is imported from <code>react-router</code></li>
+</ol>
+<p>Even if you have never seen React before, you can still figure out that <code>location</code> is probably related to the location of the URL (and not the city of the user, for instance).</p>
+
+<p style="font-size: 0.7em; color: gray">Since there are no rows of code between the call to <code>useLocation()</code> and the usage of <code>location</code>, you could argue that the traceability index of <code>location</code> is 1.</p>
+
+
+
+#heading# Trapped by technology
+
+<p>We can not always chose which technology to use. But you can still do your best to increase readability and traceability:</p>
+
+<ul>
+    <li>Naming conventions</li>
+    <li>Comments</li>
+    <li>Variable and function names</li>
+</ul>
+
+<p>For instance, you can make sure to always prefix global variables with <b>g_</b>, or member variables with <b>_</b>.</p>
+
+<p>If you have helper functions, you can make sure to include a prefix indicating where they originate from.</p>
+
+<div class="code-header">Example E</div>
+<code><pre class="prettyprint lang-cplusplus">
+// No conventions
+class Greeter {
+    char *rolls;
+
+    void Hello(const char* str) {
+        intersperse(location, str);
+
+        fixes->count();
+        rolls++;
+    }
+}
+</pre></code>
+
+<p>In order to reason about the code in Example E, you would have to trace all variables. Even worse, you will have to trace some functions to. For instance: can <code>intersperse</code> change the database?</p>
+
+<div class="code-header">Example F</div>
+<code><pre class="prettyprint lang-cplusplus">
+// Better
+class Greeter {
+    char *_rolls;
+
+    void Hello(const char* str) {
+        char *loc = location; // From GPS-library
+        str_utils_intersperse(loc, str);
+
+        g_fixes->count();
+        _rolls++;
+    }
+}
+</pre></code>
+
+<p>In Example F, we can actually draw conclusions from the code, just by reading the <code>Hello</code>-function.</p>
+<ol>
+    <li>We are reading a GPS-coordinate</li>
+    <li>Doing some string manipulation</li>
+    <li>Potentially altering the global variable fixes</li>
+    <li>Updating the member variable rolls.</li>
+</ol>
+
+#heading# The benefits
+
+<p>By spending less <b>time</b> chasing variable definitions, you might reap the following benefits:</p>
+
+<ul>
+    <li>You can keep more <b>focus</b> on solving your actual problem...</li>
+    <li>...which will make the job more <b>fun</b>! Most people do not become developers to dechipher old peoples' code.
+    <li>You will save <b>money</b> by doing the job faster.</li>
+</ul>
+
+<p>I wish that you get to create and take part of fun code with easily traceable variables :)</p>
