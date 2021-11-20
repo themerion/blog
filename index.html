@@ -21,11 +21,10 @@
 		<section id="about">
 			<h2>About me</h2>
 			<p>My name is Erik Lissel, and I am <span id="age"></span> years old. I am crazy about
-				programming&nbsp;patterns and making code that has as low complexity as possible. I am currently very warm towards JavaScript and
-				the	functional patterns it enables.	I work as a consultant programmer at <a id="work" href="">_</a> in Örebro, Sweden.
+				programming&nbsp;patterns and making code that has as low complexity as possible. 
+				I currently work as a frontend developer at the company <a href="https://epulze.com">Epulze</a> in Örebro, Sweden.
 				When I am not staring at a screen I enjoy: downhill&nbsp;skiing,
-				tabletop&nbsp;games, and singing. I also do physical exercise several times a week to keep the mind and
-				body sharp.</p>
+				tabletop&nbsp;games, and singing.</p>
 		</section>
 
 		<script>
@@ -34,17 +33,6 @@
 				var ageDiffMs = new Date().getTime() - new Date("1988-07-08").getTime(); // Feel free to send edible presents.
 				var ageDate = new Date(ageDiffMs);
 				age.innerHTML = Math.abs(ageDate.getUTCFullYear() - 1970);
-			})();
-
-			(function () {
-				var a = document.querySelector("#work");
-				if (new Date().getTime() > new Date("2020-02-15").getTime()) {
-					a.innerHTML = "Consid";
-					a.href = "https://www.consid.se";
-				} else {
-					a.innerHTML = "Impera";
-					a.href = "https://impera.se";
-				}
 			})();
 		</script>
 
