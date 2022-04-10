@@ -161,6 +161,7 @@ td, th {
 	background-color: lightsalmon;
 	font-size: larger;
 	box-shadow: 5px 5px 5px grey;
+	text-align: center;
 }
 
 @media (max-width: 599px) {

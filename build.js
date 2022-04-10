@@ -21,7 +21,7 @@ function build() {
 
     let articleTemplate = fs.readFileSync("articleTemplate.html", 'utf8');
 
-    fs.rmdirSync("dist", {recursive: true});
+    fs.rmSync("dist", {recursive: true});
     fs.mkdirSync("dist");
 
     let articleMetas = [];
@@ -40,11 +40,13 @@ function generateArticle(article, articleTemplate) {
     let headHtml = fs.readFileSync("headTemplate.html", 'utf8');
     let titleContainerHtml = fs.readFileSync("titleContainerTemplate.html", 'utf8');
     let raw = fs.readFileSync(article.localPath, 'utf8');
-    let { content, title, meta, date } = parseArticleTwig(raw, article.name);
+    let { content, title, meta, date, image } = parseArticleTwig(raw, article.name);
 
     let [textHeadings, content2] = processTextHeadings(content);
     let tblContent = generateTableOfContentsHtml(textHeadings);
     let content3 = tblContent + content2;
+
+    let ogImage = image ? `<meta property="og:image" content="https://lissel.net/${image}" />` : "";
 
     let articleHtml = articleTemplate
         .replace(/#title#/g, title) // using /g because of <title> and <h1>
@@ -52,6 +54,7 @@ function generateArticle(article, articleTemplate) {
         .replace(/#created#/, generateDateHtml(date))
         .replace(/#meta#/, meta)
         .replace(/#head#/, headHtml)
+        .replace(/#ogimage#/, ogImage)
         .replace(/#title-container#/, titleContainerHtml)
         ;
 
@@ -97,11 +100,13 @@ function copyStaticFiles() {
 }
 
 function parseArticleTwig(twig, twigName) {
-    function parseField(fieldName) {
+    function parseField(fieldName, optional) {
         let fieldString = "#" + fieldName + "#";
         let pos = twig.indexOf(fieldString);
-        if (pos === -1)
+        if (pos === -1) {
+            if(optional) { return null; }
             throw "Could not parse expected field " + fieldString + " for " + twigName;
+        }
         let endPos = twig.indexOf("\n", pos + fieldString.length);
         if (endPos === -1)
             throw "Could not find end of line (\\n) while parsing field " + fieldString + " for " + twigName;
@@ -122,7 +127,8 @@ function parseArticleTwig(twig, twigName) {
         content: twig.substring(contentStart),
         title: parseField("title"),
         meta: parseField("meta"),
-        date: parseField("created")
+        date: parseField("created"),
+        image: parseField("image", true)
     };
 }
 
