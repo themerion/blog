@@ -178,6 +178,53 @@ td, th {
 	cursor: pointer;
 }
 
+/* ------------ */
+
+.expandable-header {
+	margin-top: 1em;
+	margin-bottom: 2em;
+	text-align: center;
+}
+
+/* Buttons */
+.expandable {
+	padding: 0.5em;
+	margin: 0.5em;
+	box-shadow: 3px 3px 3px gray;
+	border-radius: 3px;
+}
+.expandable:hover {
+	cursor: pointer;
+}
+.expandable-active-label {
+	font-weight: bold;
+	text-decoration: underline;
+	background-color: #ff3;
+}
+
+/* Children */
+.expandable-hidden {
+	opacity: 0;
+	max-height: 0;
+	overflow: hidden;
+}
+
+.expandable-shown {
+	opacity: 1;
+	max-height: 100%;
+	animation-name: expandable-show;
+	animation-duration: 1s;
+	background-color: #ff7;
+	border: 2px solid #ff3;
+	border-radius: 20px;
+}
+
+@keyframes expandable-show {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+
 /* ==========================
 *     _LAYOUT
 * =========================== */

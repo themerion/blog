@@ -5,8 +5,9 @@
         document.addEventListener("DOMContentLoaded", init);
 
     function init() {
-        try { initTabs(); } catch(e) { console.error(e); }
-        try { styleTagBackgrounds(); } catch(e) { console.error(e); }
+        try { initTabs(); } catch (e) { console.error(e); }
+        try { initExpandables(); } catch (e) { console.error(e); }
+        try { styleTagBackgrounds(); } catch (e) { console.error(e); }
     }
 
     // === TAGS ===
@@ -65,6 +66,44 @@
                 selectButton(tabList.firstChild);
                 tabPane.insertBefore(tabList, tabPane.firstChild);
             })();
+        }
+    }
+
+    // === EXPANDABLES ===
+    function closeOpenExpandable(group) {
+        const current = group.querySelector(".expandable-shown");
+        const currentLabel = group.querySelector(".expandable-active-label");
+        if (current) {
+            current.classList.remove("expandable-shown");
+            current.classList.add("expandable-hidden");
+        }
+        if (currentLabel) {
+            currentLabel.classList.remove("expandable-active-label");
+        }
+    }
+
+    function onExpandableClicked(source, group) {
+        return function (evt) {
+            const target = group.querySelector(source.getAttribute("for"));
+            const targetShouldShow = target.classList.contains("expandable-hidden")
+
+            closeOpenExpandable(group);
+
+            if (targetShouldShow) {
+                target.classList.remove("expandable-hidden");
+                target.classList.add("expandable-shown");
+                source.classList.add("expandable-active-label");
+            }
+        };
+    }
+
+    function initExpandables() {
+        const groups = document.querySelectorAll(".expandable-group");
+        for (const group of groups) {
+            const expandables = group.querySelectorAll(".expandable");
+            for (const exp of expandables) {
+                exp.addEventListener("click", onExpandableClicked(exp, group));
+            }
         }
     }
 })();

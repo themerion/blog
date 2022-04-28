@@ -2,6 +2,8 @@ import * as fs from "fs";
 import * as path from "path";
 import { ArticleParser } from "./ArticleParser.js";
 import { ArticleContentBuilder } from "./ArticleContentBuilder.js";
+import { ArticleSection } from "./ArticleParts.js";
+import { tableOfContents } from "./tableOfContents.js";
 
 // ------------------------------------------------------------
 
@@ -83,15 +85,19 @@ function generateArticle(
 ) {
     const parse = new ArticleParser(name, rawContent);
     const { title, meta, date, image } = parse.hashFields();
+    const ogImage = image ? `<meta property="og:image" content="https://lissel.net/${image}" />` : "";
     const sections = parse.sections();
     const tldr = parse.tldr();
 
-    let ogImage = image ? `<meta property="og:image" content="https://lissel.net/${image}" />` : "";
+    const tldrSection : ArticleSection = {heading: "tl;dr", content: tldr};
+    const tableOfContentsSection = tableOfContents(sections.map(s => s.heading));
 
     const contentBuilder = new ArticleContentBuilder();
     const content = contentBuilder
-        .tldr(tldr)
-       // .tableOfContents(sections.map(s => s.heading))
+        .expandableSections([
+            tldrSection,
+            tableOfContentsSection
+        ])
         .sections(sections)
         .getResult();
 

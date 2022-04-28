@@ -1,4 +1,6 @@
 import { ArticleSection } from "./ArticleParts.js";
+import { ExpandableBuilder } from "./ExpandableBuilder.js";
+import { generateIdFromHeading } from "./generateIdFromHeading.js";
 
 // ------------------------------------------------
 
@@ -9,22 +11,17 @@ export class ArticleContentBuilder {
 		this.#content = "";
 	}
 
-	tldr(content: string) {
-		this.#content += `<h2 id="tldr">tl;dr</h2>`
-		this.#content += content;
-		return this;
-	}
-
-	tableOfContents(headings: string[]) : ArticleContentBuilder {
-		if (!headings.length)
-        	return this;
-
-		let rows = "";
-		for (let x of headings) {
-			rows += '<li><a href="#' + generateIdFromHeading(x) + '">' + x + '</a></li>';
+	expandableSections(sections: (ArticleSection | null)[]) : ArticleContentBuilder {
+		const builder = new ExpandableBuilder();
+		for (const s of sections) {
+			if (!s) continue;
+			builder.add(
+				s.heading,
+				s.content,
+				generateIdFromHeading(s.heading),
+			);
 		}
-		this.#content += `<h2>Table of contents</h2>`;
-		this.#content += `<ol id="article-index">${rows}</ol>`;
+		this.#content += builder.print();
 		return this;
 	}
 
@@ -35,7 +32,7 @@ export class ArticleContentBuilder {
 		return this;
 	}
 
-	sections(sections: ArticleSection[]) {
+	sections(sections: ArticleSection[]) : ArticleContentBuilder {
 		for(const s of sections) this.section(s);
 		return this;
 	}
@@ -43,13 +40,4 @@ export class ArticleContentBuilder {
 	getResult() : string {
 		return this.#content;
 	}
-}
-
-// ==============================================================
-
-function generateIdFromHeading(heading: string) {
-    return heading
-        .toLowerCase()
-        .replace(/ /g, "-")
-        .replace(/[!?&.,;:]/g, "");
 }
