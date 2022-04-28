@@ -67,12 +67,4 @@
             })();
         }
     }
-
-    // === HIDDEN PANEL ===
-    class HiddenPanel extends HTMLElement {
-        connectedCallback() {
-            this.innerHTML = `<p>Ok</p>`
-        }
-    }
-    window.customElements.define("hidden-panel", HiddenPanel);
 })();

@@ -23,7 +23,7 @@ export class ArticleContentBuilder {
 		for (let x of headings) {
 			rows += '<li><a href="#' + generateIdFromHeading(x) + '">' + x + '</a></li>';
 		}
-		this.#content += `<h2>Table of contents</h2>`
+		this.#content += `<h2>Table of contents</h2>`;
 		this.#content += `<ol id="article-index">${rows}</ol>`;
 		return this;
 	}

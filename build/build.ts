@@ -91,7 +91,7 @@ function generateArticle(
     const contentBuilder = new ArticleContentBuilder();
     const content = contentBuilder
         .tldr(tldr)
-        .tableOfContents(sections.map(s => s.heading))
+       // .tableOfContents(sections.map(s => s.heading))
         .sections(sections)
         .getResult();
 
