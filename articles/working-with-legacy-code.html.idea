@@ -4,11 +4,13 @@
 #tags# C#
 
 
-#heading# tl;dr
+#tldr#
 
 <ul>
+    <li>Work in small steps</li>
     <li>Define new interfaces on top of the old ones</li>
     <li>First, insert your changes in an ugly way</li>
     <li>Write tests</li>
     <li>Refactor from services/managers to stateless components</li>
+    <li><b>Work in small steps!</b></li>
 </ul>

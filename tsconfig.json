@@ -1,0 +1,10 @@
+{
+  "extends": "@tsconfig/node16/tsconfig.json",
+  "compilerOptions": {},
+  "exclude": ["node_modules", "dist"],
+  "paths": ["node_modules"],
+  "compilerOptions": {
+  	"esModuleInterop": true,
+	"target": "ES2016"
+  }
+}

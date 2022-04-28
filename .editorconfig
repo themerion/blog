@@ -1,4 +1,4 @@
-[*.html, *.css]
+[*.html, *.css, *.js, *.ts]
 indent_style = tab
 indent_size = tab
 tab_size = 4
