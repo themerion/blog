@@ -1,0 +1,118 @@
+#title# The drawbacks of front-end frameworks
+#meta# A note on maintainability.
+#created# 2021-02-12
+#tags# Javascript
+
+
+#tldr#
+
+<p>Javascript frameworks have short liftetimes and rely on rapidly changing build chains. Use them as little as possible, to get a more maintainable application.</p>
+
+
+#heading# Backwards compatibility of the web
+
+<p>A website written in <b>1999</b> would still be viewable in todays browsers.
+The web is fundamentally designed around a mind-numbingly strong idea of backward compatibility.</p>
+
+<p> You might even say that some of the ugliest parts of Javascript are due to the fact that it doesn't remove old and bad design choices.</p>
+
+<p>Likewise, joining a website development team should be relatively easy. HTML, CSS, and Javascript doesn't change.</p>
+
+
+#heading# Complex build-chains
+
+<p>The landscape of web development today is fragmented and complex. A modern setup will use a mix of the following build-steps:</p>
+<ul>
+    <li>TypeScript</li>
+    <li>SCSS</li>
+    <li>React / Angular / Vue / Svelte</li>
+    <li>Minification</li>
+    <li>Transpiling / Polyfilling</li>
+    <li>Bundling</li>
+    <li>Inline:ing of certain assets</li>
+    <li>Splitting css into critical and non-critical parts</li>
+</ul>
+
+<p>Often, the output from one or more steps needs to be fed into the next step in a <b>specific order</b>. To help orchestrating the build there are a slew of build-systems, for instance:</p>
+<ul>
+    <li>Webpack</li>
+    <li>Parcel</li>
+    <li>Rollup</li>
+    <li>Grunt</li>
+</ul>
+
+<p class="important-note">These build-steps and build-systems are <b>rapidly changing</b>. This is different from regular application development. GNU Make has been stable for... 30 years or more?</p>
+
+<p>I was given custody of a three year old project. Since the project's creation, webpack had gone from version 1.0 to 4.0, and completely changed the format of its configuration file. All plugins had changed syntax or settings, or even worse: functionality.</p> 
+
+
+#heading# Easy to start, impossible to upgrade
+
+<p>Despite the complex build systems, front-end frameworks have made themselves very easy to setup. Just type <span class="command">create-react-app</span> or <span class="command">ng init</span>, and you will have a working structure up in minutes.</p>
+
+<p>The thing that is never easy: upgrading. If you are lucky, there will be sufficient instructions on how to upgrade to "the next" version. In real life, many projects allocate resources only when a feature should be added. This might well be three or five years away, and it is not so easy to upgrade anymore.</p>
+
+<p>You should be <b>especially wary</b> of using framework dependent libraries, such as angular-moment or react-bootstrap. They are nasty because they are usually not only tied to the framework, but to a <i>specific version of the framework</i>.</p>
+
+<p>Let's say you have a lot of dependencies on the package <span class="command">angular-smurf-0.13.2</span>, and that package has a dependency to angular version 6 or lower. Failing to upgrade <span class="command">angular-smurf</span> will now prevent you from upgrading angular.</p>
+
+
+#heading# Worse for the developers
+
+<p>I once met a front-end programmer who gave me a blank stare when I suggested we use a <span class="command">promise</span> for shuffling data. You see, he had only learned angularJS, so he wouldn't understand until I suggested we use <span class="command">$q</span>.</p>
+
+<p>By learning AngularJS instead of basic Javascript, he now has an outdated skillset; and his skills are not transferable to other projects.</p>
+
+
+#heading# Harder to find developers
+
+<p>There is a constant shortage of developers. Developers who know vue-router are even harder to come by. The more specialiced tech you use; the harder it will be to find a good fit.</p>
+
+<p>On the other hand, if you strive to keep your code base as close to regular HTML, CSS and Javascript as possible; you will have a much larger pick of possible suitable developers to hire.</p>
+
+
+#heading# Some crazy alternatives
+
+<ul>
+<li> For <b>components and templates</b>: Normal javascript is slowly getting support for shadow DOM and other good stuff. It is still a bit cluncky to work with, though. However, there is absolutely nothing stopping you from implementing components in plain Javascript and css:
+
+<code><pre class="prettyprint lang-html">
+    &lt;div class="annoying-label-component" data-label="hi there"&gt;&lt;/div&gt;
+</pre></code>
+
+<code><pre class="prettyprint lang-javascript">
+/*
+ * Component: AnnoyingLabel
+ *  - Sends an alert prompt when clicked.
+*/
+const annoyingLabels = document.querySelector(".annoying-label-component");
+for(const annoyingLabel of annoyingLabels) {
+    annoyingLabel.innerHTML = annoyingLabel.data.label + "!!!";
+    annoyingLabel.addEventListener("click", () => alert(annoyingLabel.data.label));
+}
+
+</pre></code>
+Notice how state is kept in the data-attributes. If you want to implement larger components, it might be a good idea to use document fragments (to avoid redraws on every call to innerHtml).
+
+You can even (sort of) make this work with nested custom components, so long as you keep the ordering in mind (containers must be generated first).
+</li>
+<li>A simple approach for <b>bundling files</b> is to just mash them together, and then run a javascript/css minifier on the result. And I would recommend coding this build-flow yourself. Just code a simple script that explicitly does what you need it too. The next developer who picks up the project will thank you<sup>*</sup>. A plain script is also simple to put into your <b>deployment</b> flow, if needed.
+</li>
+
+<sup>* No, of course they won't. They will simply look at the code and understand it, and get on with whatever it was they were supposed to do. And that is the best praise you can get.</sup>
+</ul>
+
+#heading# Takeaways
+
+<p>Front-end frameworks were created to fill a need for nicer development experiences. However, they do come at a high cost.</p>
+
+<p>My recommendation is to ask the following questions before committing to one:</p>
+
+<ul>
+    <li>Will my application be so complex that I really need an entire framework to manage my files?</li>
+    <li>Do I have so high performance demands that tree-shaking and bundling are absolute musts?</li>
+    <li>Will there be so many asynchronous inputs to the application that I cannot live without Angular and observables?</li>
+    <li><b>Can I get away with using just plain old Javascript, or a few slim libraries?</b></li>
+</ul>
+
+<p>Of the available frameworks today, I find <b>vue</b> to be the most agreeable. Not because I like its syntax or build chain, but simply because you can opt to use it without a build chain, where you need it. Used in moderation, it should be simple enough to grasp even for junior developers.</p>
