@@ -12,7 +12,7 @@
 
 <p>It is said that 80% of the cost of a system happens after the system is launched. Reasons for this could be new features, changes, operations, and bugs.</p>
 
-<p>The implications are huge - it is not terribly important how quickly you can write code. What is important is how easily existing code can be:</p>
+<p>The implications are huge - <b>your code-writing speed is not important</b>. What is important is how easily existing code can be:</p>
 <ul>
     <li>Understood</li>
     <li>Modified</li>
@@ -34,194 +34,57 @@
 
 #heading# The Single Responsibility Principle
 
-
+<p>Let's imagine we are trying to build an ice-cream program. Exactly what it does is not important, but it will need some logging, business logic, database connectivity and stream reading:</p>
 
 <div style="text-align: center; margin-top: 50px; margin-bottom:50px;">
-    <img src="bloated-classes.png" style="max-width: 100%" />
+    <img src="lego-solid-program.png" style="max-width: 100%" />
 </div>
 
-<p class="important-note">The practice of mindlessly adding functions or fields to an existing class will inevitably lead to bloat.</p>
-
-#heading# A software design mindset
-
-<p>It is important to follow the Single Responsibility Principle of <a href="https://en.wikipedia.org/wiki/SOLID" target="_blank">SOLID</a>. That could be summarized as:</p>
-
-<p class="important-note">"A class should do one thing and do it well"</p>
-
-<p>In other words, you need to look at the <u>role</u> of the class. How would your desired change affect the class' responsiblity?</p>
-
-<p>Let's say you are creating a UI-component called <code>Heading</code>, responsible for displaying a large title text. Now, your desired change is for some headings to have icons. Adding an icon-field to the <code>Heading</code>-class will dilute its responsibilities! An alternative approach would be to create a new specialized class <code>HeadingWithIcon</code>.</p>
-
-#heading# Specialization
-
-<p>If the desired change is to define some <u>default behavior</u>, i.e: specialize an existing class: use <b>composition</b>.</p>
-
-<p>For instance, let's say you have a <code>Logger</code> class that can print messages. Now you want some logs to be prefixed with their severity (warning, info, error, etc.):</p>
-
-<pre style="background-color: #ccc">WARNING: Got a null value
-ERROR: Ice-cream delivery sub-process crashed!
-INFO: Ice-cream delivery will be late.
-</pre>
-
-<p>Instead of changing the existing <code>Logger</code>, create a new specialized class - <code>SeverityLogger</code></p>
+<p>Now, the yellow piece expects to be connected to the stream-reader. Let's define the interface (i.e. the "dots" of the yellow lego piece):</p>
 
 <code><pre class="prettyprint lang-csharp">
-public class SeverityLogger {
-    Logger _logger;
+public interface IIceCreamStreamReader {
+	IceCreamData[] ReadFromStream(string fileName)
+}
+</pre></code>
 
-    public SeverityLogger(Logger logger) {
-        _logger = logger;
-    }
+<p><b>INSERT IMAGE OF MISSING PART</b></p>
 
-    public void Log(string message, Severity severity) {
-        string sevStr = SeverityToString(severity);
-        _logger.Log(sevStr + ": " + message, severity);
-    }
+<p>So, we'll try to implement the stream reading part:</p>
 
-    private string SeverityToString(Severity s) {
-        return (
-            s == Severity.WARNING ? "WARNING" :
-            s == Severity.ERROR ? "ERROR" :
-            s == Severity.INFO ? "INFO" :
-            "UNKNOWN SEVERITY";
+<code><pre class="prettyprint lang-csharp">
+public class IceCreamStreamReader {
+    public IceCreamData[] ReadFromStream(string fileName) {
+		var executablePath = Assembly.GetEntryAssembly().Location;
+		var filePath = Path.Combine(fileName, executablePath)
+		var stream = File.OpenRead(filePath)
+
+		IceCreamData[] iceCreams = new IceCreamData[] {};
+
+		var array = new byte[300];
+		var span = new Span<byte>(array);
+		while(stream.Read(span,0,span.length) > 0) {
+			iceCreams.push(ParseAsIceCream(span));
+		}
+
+		foreach(var iceCream in iceCreams) {
+		  if (iceCream.Size > 5 || iceCream.Size < 1) {
+		    throw new Exception("Invalid ice cream size");
+		  }
+		  if (!PossibleTastes.Contains(iceCream.Taste)) {
+		    throw new Exception("Unknown taste");
+		  }
+		  if (iceCream.Payment != 0) {
+		  	throw new Exception("Ice cream payment should be 0")
+		  }
+		}
+	}
+
+    private IceCreamData ParseAsIceCream(Span<byte> span) {
+        // A b*ttload of parsing code
+        // ...
     }
 }
 </pre></code>
 
-#heading# Extension
 
-<p>If the desired change is to optionally <u>add</u> some extra data to an existing class, then extension might be a good choice (notice how "add" is in opposite to "specialize").</p>
-
-<p>Let's say you have a menu structure set up, consiting of multiple <code>MenuItem</code>. Now, you would want to hide some items depending on the user's access level.</p>
-
-<p>Instead of changing the existing <code>MenuItem</code>, create a new class <code>AuthorizedMenuItem</code> that extends <code>MenuItem</code>:</p>
-
-<code><pre class="prettyprint lang-csharp">
-public class AuthorizedMenuItem : MenuItem {
-    int _accessLevel;
-
-    public AuthoriedMenuItem(int accessLevel, ...) {
-        super(...);
-        _accessLevel = accessLevel;
-    }
-
-    public boolean CanBeViewed(AccessLevel userAccessLevel) {
-        return userAccessLevel >= _accessLevel;
-    }
-}
-</pre></code>
-
-<p>It should be noted that this use case is perhaps even more suited for <b>decorators</b> or instance meta-data (if your language supports it).</p>
-
-#heading# Difficult cases
-
-<p>Let's face it: you are likely to run into situations where you want a bit of specification AND some new functionality. In this case, <b>refactoring</b> is your best friend.</p>
-
-<p class="important-note">Break out important common functionality into smaller classes or functions.</p>
-
-<p><u>Some</u> code repetition is bound to happen, and <u>that is ok</u>.</p>
-
-<p>Let's say you have a simple <code>Button</code>-class:</p>
-
-<code><pre class="prettyprint lang-csharp">
-public class OldButton {
-    public void SetOnClick(Action<>);
-    public void SetText(string);
-    public void Draw();
-}
-</pre></code>
-
-<p>Now you sometimes want the button to display an icon as well as text. In this case, you could try to break out the outline and text-settings into its own class:</p>
-
-<code><pre class="prettyprint lang-csharp">
-/**
- * Superclass for drawing empty buttons
- */
-public class BlankButton {
-    public void SetOnClick(Action<>);
-    public void Draw(); // Draw the outline and call DrawContents()
-
-    // Open up for subclasses to do their own thing
-    public virtual void DrawContents();
-}
-</pre></code>
-
-<code><pre class="prettyprint lang-csharp">
-/**
- * Class for drawing a button with a text label
- */
-public class TextButton : BlankButton {
-    string _text;
-
-    public TextButton(string text) {
-        _text = text;
-    }
-
-    public override void DrawContents() {
-        someDrawApi.drawText(_text);
-    }
-}
-</pre></code>
-
-<code><pre class="prettyprint lang-csharp">
-/**
- * Class for drawing a button with a text label
- * and an image icon
- */
-public class TextIconButton : BlankButton {
-    string _text;
-    Icon _icon;
-
-    public TextIconButton(string text, Icon icon) {
-        _text = text;
-        _icon = icon;
-    }
-
-    public override void DrawContents() {
-        someDrawApi.drawText(_text);
-        someDrawApi.drawImage(_icon);
-    }
-}
-</pre></code>
-
-#heading# The power of interfaces
-
-<p>The drawback of using these methods (except extension) is that you can't use your new classes as drop-in replacements in existing code. If you existing code expects a <code>Logger</code>, you can't just provide a <code>SeverityLogger</code> without changing all the places using the <code>Logger</code>.</p>
-
-<p>This is a great reason to try and use interfaces in your code from the start. If your code is depending on an interface <code>ILogger</code>, it is quite simple to make <code>SeverityLogger</code> confirm to that interface:</p>
-
-<code><pre class="prettyprint lang-csharp">
-public interface ILogger {
-    Log(string message, Severity severity);
-}
-</pre></code>
-
-<code><pre class="prettyprint lang-csharp">
-public class SeverityLogger : ILogger {
-
-    // ...
-
-    public void Log(string message, Severity severity) {
-        string sevStr = SeverityToString(severity);
-        _logger.Log(sevStr + ": " + message, severity);
-    }
-}
-</pre></code>
-
-<code><pre class="prettyprint lang-csharp">
-pubic class Application {
-    ILogger _logger;
-
-    public void Main() {
-        _logger = new SeverityLogger(new ConsoleLogger());
-
-        // ...aaand the rest of the application code can be unchanged :)
-    }
-}
-</pre></code>
-
-#heading# Don't be an idiot
-
-<p>As stated in the beginning, carefully consider the desired responsibility of the class. Don't just go and implement a slew of nice design patterns just because you can.</p>
-
-<p>Sometimes it makes perfect sense to straight up add functionality to an existing class. However, that decision should be dictated by software design, and not the need for change itself!</p>
