@@ -1,0 +1,313 @@
+#title# The Single Responsibility Principle explained with lego
+#meta# Never do more than one thing
+#created# 2022-07-10
+#tags# C#
+#image# lego-srp.png
+
+#tldr#
+
+<p>The single responsibility principle states that a class should never do more than one thing.</p>
+
+<p>Don't do this:</p>
+
+<div style="text-align: center; margin-top: 50px; margin-bottom:50px;">
+    <img src="lego-srp.png" style="max-width: 100%" />
+</div>
+
+<!--
+<p>heading Getting our priorities straight</p>
+
+<p>It is said that 80% of the cost of a system happens after the system is launched. Reasons for this could be new features, changes, operations, and bugs.</p>
+
+<p>The implications are huge - <b>your code-writing speed is not important</b>. What is important is how easily existing code can be:</p>
+<ul>
+    <li>Understood</li>
+    <li>Modified</li>
+    <li>Re-used</li>
+</ul>
+
+<p>heading Principles</p>
+
+<p>To guide us when making decisions on <b>how</b> to write code, we use principles. Juxtaposing different principles against each other helps us to understand the tradeoffs between different decisions.</p>
+
+<p>The SOLID principles are well established in the OOP-community, and they consist of the:</p>
+<ul>
+    <li><b>S</b>ingle responsibility principle</li>
+    <li><b>O</b>pen/closed principle</li>
+    <li><b>L</b>iskov substitution principle</li>
+    <li><b>I</b>nterface segregation principle</li>
+    <li><b>D</b>ependency inversion principle</li>
+</ul>-->
+
+#heading# The ice-cream program
+
+<p>Say we are trying to build an ice-cream program. Exactly what it does is not important, but it will need some logging, database connectivity and stream reading.</p>
+
+<div style="text-align: center; margin-top: 50px; margin-bottom:50px;">
+	<img src="lego-solid-program0.png" style="max-width: 100%" />
+</div>
+
+<p>Let us define an interface that our program can use for the stream reading:</p>
+
+<code><pre class="prettyprint lang-csharp">
+interface IStreamReader {
+    IceCreamData[] ReadFromStream(string fileName)
+}
+</pre></code>
+
+
+#heading# Implementing the stream reader
+
+<p>Now, we'll try to implement the <code>IStreamReader</code>:</p>
+
+<div style="text-align: center; margin-top: 50px; margin-bottom:50px;">
+    <img src="lego-solid-program1.png" style="max-width: 100%" />
+</div>
+
+<code><pre class="prettyprint lang-csharp">
+public class IceCreamStreamReader : IStreamReader {
+    public IceCreamData[] ReadFromStream(string fileName) {
+        // --- Open stream ---
+        var executablePath = Assembly.GetEntryAssembly().Location;
+        var filePath = Path.Combine(fileName, executablePath)
+        var stream = File.OpenRead(filePath)
+
+        // --- Read from stream ---
+        IceCreamData[] iceCreams = new IceCreamData[] {};
+
+        var array = new byte[300];
+        var span = new Span&lt;byte&gt;(array);
+        while(stream.Read(span,0,span.length) > 0) {
+            iceCreams.push(ParseAsIceCream(span));
+        }
+
+        // --- Validate data ----
+        foreach(var iceCream in iceCreams) {
+          if (iceCream.Size > 5 || iceCream.Size < 1) {
+            throw new Exception("Invalid ice cream size");
+          }
+          if (!PossibleTastes.Contains(iceCream.Taste)) {
+            throw new Exception("Unknown taste");
+          }
+          if (iceCream.Payment != 0) {
+              throw new Exception("Ice cream payment should be 0")
+          }
+        }
+    }
+
+    private IceCreamData ParseAsIceCream(Span&lt;byte&gt; span) {
+        // A b*ttload of parsing code
+        // ...
+    }
+}
+</pre></code>
+
+<p>This is a bit of a wall of text. Did this hurt your eyes/brain to read? Did you notice the missing return at the end?</p>
+
+<p>Worse, the class would grow even clumsier if you would need to:</p>
+
+<ul>
+	<li>Sometimes open the stream from memory or a http-connection</li>
+	<li>Use different formats for the stream parsing</li>
+	<li>Sometimes add on additional validation rules</li>
+</ul>
+
+#heading# The Single Responsibility Principle
+
+<p>The root of the issue is that our <code>IceCreamStreamReader</code> has too many responsibilities. It is supposed to:</p>
+<ul>
+	<li>Open the stream</li>
+	<li>Parse the stream</li>
+	<li>Validate the parsed contents</li>
+</ul>
+
+<p>I.e. we thought we were implementing a single nice lego brick:</p>
+
+<div style="text-align: center; margin-top: 50px; margin-bottom:50px;">
+    <img src="lego-first-attempt-idea.png" style="max-width: 100%" />
+</div>
+
+<p>But in fact this is what we did. Yuck:</p>
+
+<div style="text-align: center; margin-top: 50px; margin-bottom:50px;">
+    <img src="lego-first-attempt-reality.png" style="max-width: 100%" />
+</div>
+
+<p>Allow me to reiterate the Single Responsiblity Principle:</p>
+
+<p class="important-note">Each class should have only one reason for existing, one responsibility.</p>
+
+#heading# Splitting into smaller classes
+
+<p>Having identified all the things that our class does, let us break it into separate components:</p>
+
+<div style="text-align: center; margin-top: 50px; margin-bottom:50px;">
+    <img src="lego-second-attempt.png" style="max-width: 100%" />
+</div>
+
+<code><pre class="prettyprint lang-csharp">
+/**
+    Responsible for chosing which components to use
+    (different streamOpeners, parsers, etc.)
+    -
+    AND responsible for running the entire flow.
+*/
+public class IceCreamStreamReader : IStreamReader {
+    public IceCreamData[] ReadFromStream(string fileName) {
+        const streamOpener = new FileStreamOpener(fileName);
+        const parser = new StreamV1Parser();
+        const validator = new IceCreamValidator();
+
+        const stream = streamOpener.OpenStream();
+
+        const iceCreams = parser.Parse(stream);
+
+        foreach(var iceCream in iceCreams) {
+            const errorMessage = validator.Validate(iceCream);
+            if (errorMessage != "") {
+                throw new Exception(errorMessage);
+            }
+        }
+
+        return iceCreams;
+    }
+}
+</pre></code>
+<code><pre class="prettyprint lang-csharp">
+public class FileStreamOpener {
+    private string fileName;
+
+    public FileStreamOpener(string fileName) {
+        this.fileName = fileName;
+    }
+
+    public Stream OpenStream() {
+        var executablePath = Assembly.GetEntryAssembly().Location;
+        var filePath = Path.Combine(fileName, executablePath)
+        var stream = File.OpenRead(filePath)
+    }
+}
+</pre></code>
+<code><pre class="prettyprint lang-csharp">
+public class StreamV1Parser {
+    public IceCreamData[] Parse(Stream stream) {
+        IceCreamData[] iceCreams = new IceCreamData[] {}; 
+
+        var array = new byte[300];
+        var span = new Span&lt;byte&gt;(array);
+        while(stream.Read(span,0,span.length) > 0) {
+            iceCreams.push(ParseAsIceCream(span));
+        }
+
+        return iceCreams;
+    }
+
+    private IceCreamData ParseAsIceCream(Span&lt;byte&gt; span) {
+        // A b*ttload of parsing code
+    }
+}
+</pre></code>
+<code><pre class="prettyprint lang-csharp">
+public class IceCreamValidator {
+    public string Validate(IceCreamData iceCream) {
+        if (iceCream.Size > 5 || iceCream.Size < 1) {
+            return "Invalid ice cream size";
+        }
+
+        if (!PossibleTastes.Contains(iceCream.Taste)) {
+            return "Unknown taste";
+        }
+
+        if (iceCream.Payment != 0) {
+            return "Ice cream payment should be 0";
+        }
+
+        return "";
+    }
+}
+</pre></code>
+
+<p>Notice how we moved all the low-level code away from <code>IceCreamStreamReader</code>. This makes it easier to reason about the flow of data in the program.</p>
+
+#heading# Going further
+
+<p>Did you notice the "AND" in the comment for the IceCreamStreamReader? It seems like it has two different responsibilities!</p>
+
+<p>First let's make interfaces for our new building blocks:</p>
+
+<code><pre class="prettyprint lang-csharp">
+interface IStreamOpener {
+    public Stream OpenStream();
+}
+
+interface IStreamParser {
+    public IceCreamData[] Parse(Stream stream);
+}
+
+interface IIceCreamValidator {
+    public string Validate(IceCreamData iceCream);
+}
+</pre></code>
+<code><pre class="prettyprint lang-csharp">
+public class FileStreamOpener : IStreamOpener {
+    // ... as before ...
+}
+</pre></code><code><pre class="prettyprint lang-csharp">
+public class StreamV1Parser : IStreamParser {
+    // ... as before ...
+}
+</pre></code><code><pre class="prettyprint lang-csharp">
+public class IceCreamValidator : IIceCreamValidator {
+    // ... as before ...
+}
+</pre></code>
+
+<p>Now we can split the main class into its two different responsiblities:</p>
+
+<div style="text-align: center; margin-top: 50px; margin-bottom:50px;">
+    <img src="lego-final-attempt.png" style="max-width: 100%" />
+</div>
+
+<code><pre class="prettyprint lang-csharp">
+/**
+    Responsible for chosing which components to use
+    (different streamOpeners, parsers, etc.)
+*/
+public class IceCreamStreamReader : IStreamReader {
+    public IceCreamData[] ReadFromStream(string fileName) {
+        const streamOpener = new FileStreamOpener(fileName);
+        const parser = new StreamV1Parser();
+        const validator = new IceCreamValidator();
+
+        const iceCreams = StreamReaderRunner.Run(streamOpener, parser, validator);
+        return iceCreams;
+    }
+}
+</pre></code>
+<code><pre class="prettyprint lang-csharp">
+/**
+    Responsible for running the entire flow: opening, parsing, and validating.
+*/
+public static class StreamReaderRunner {
+    public static IceCreamData[] Run(IStreamOpener opener, IStreamParser parser, IIceCreamValidator validator) {
+        const stream = opener.OpenStream();
+
+        const iceCreams = parser.Parse(stream);
+
+        foreach(var iceCream in iceCreams) {
+            const errorMessage = validator.Validate(iceCream);
+            if (errorMessage != "") {
+                throw new Exception(errorMessage);
+            }
+        }
+
+        return iceCreams;
+    }
+}
+</pre></code>
+
+#heading# Closing notes
+
+<p>In this case it might be reasonable to ask: is it really up to the <code>IceCreamStreamReader</code> to decide upon validation? Or from which network port to load the stream?</p>
+
+<p>Maybe this decision belongs inside the program's code. In this case the interface between the program and the stream reader is no longer correct, and should be expanded.</p>
